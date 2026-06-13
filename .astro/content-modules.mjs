@@ -1,0 +1,27 @@
+
+export default new Map([
+["src/content/docs/deployment/overview.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fdeployment%2Foverview.mdx&astroContentModuleFlag=true")],
+["src/content/docs/deployment/terraform-apply.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fdeployment%2Fterraform-apply.mdx&astroContentModuleFlag=true")],
+["src/content/docs/deployment/verifying.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fdeployment%2Fverifying.mdx&astroContentModuleFlag=true")],
+["src/content/docs/deployment/web-ui.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fdeployment%2Fweb-ui.mdx&astroContentModuleFlag=true")],
+["src/content/docs/ecs-express-mode/auto-scaling.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fecs-express-mode%2Fauto-scaling.mdx&astroContentModuleFlag=true")],
+["src/content/docs/ecs-express-mode/concepts.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fecs-express-mode%2Fconcepts.mdx&astroContentModuleFlag=true")],
+["src/content/docs/ecs-express-mode/express-gateway-service.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fecs-express-mode%2Fexpress-gateway-service.mdx&astroContentModuleFlag=true")],
+["src/content/docs/ecs-express-mode/health-checks.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fecs-express-mode%2Fhealth-checks.mdx&astroContentModuleFlag=true")],
+["src/content/docs/iam-roles/infrastructure-role.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fiam-roles%2Finfrastructure-role.mdx&astroContentModuleFlag=true")],
+["src/content/docs/iam-roles/overview.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fiam-roles%2Foverview.mdx&astroContentModuleFlag=true")],
+["src/content/docs/iam-roles/task-execution-role.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fiam-roles%2Ftask-execution-role.mdx&astroContentModuleFlag=true")],
+["src/content/docs/iam-roles/task-role-bedrock.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fiam-roles%2Ftask-role-bedrock.mdx&astroContentModuleFlag=true")],
+["src/content/docs/index.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Findex.mdx&astroContentModuleFlag=true")],
+["src/content/docs/networking/ingress.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fnetworking%2Fingress.mdx&astroContentModuleFlag=true")],
+["src/content/docs/networking/public-subnets.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fnetworking%2Fpublic-subnets.mdx&astroContentModuleFlag=true")],
+["src/content/docs/networking/security-groups.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fnetworking%2Fsecurity-groups.mdx&astroContentModuleFlag=true")],
+["src/content/docs/networking/vpc-layout.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fnetworking%2Fvpc-layout.mdx&astroContentModuleFlag=true")],
+["src/content/docs/overview.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Foverview.mdx&astroContentModuleFlag=true")],
+["src/content/docs/prerequisites.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fprerequisites.mdx&astroContentModuleFlag=true")],
+["src/content/docs/reference/decision-checklist.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Freference%2Fdecision-checklist.mdx&astroContentModuleFlag=true")],
+["src/content/docs/reference/limitations.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Freference%2Flimitations.mdx&astroContentModuleFlag=true")],
+["src/content/docs/reference/when-to-use-express-mode.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Freference%2Fwhen-to-use-express-mode.mdx&astroContentModuleFlag=true")],
+["src/content/docs/teardown.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fteardown.mdx&astroContentModuleFlag=true")],
+["src/content/docs/troubleshooting.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Ftroubleshooting.mdx&astroContentModuleFlag=true")]]);
+		

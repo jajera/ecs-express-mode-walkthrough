@@ -1,0 +1,97 @@
+---
+title: 'Infrastructure Role'
+description: 'IAM role granting ECS Express Mode permissions to provision ALB, networking, and auto scaling resources.'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../../components/Tooltip.astro';
+
+## Overview
+
+The <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip> is assumed by the ECS service principal (`ecs.amazonaws.com`) and grants Express Mode permissions to provision and manage ALB, networking, and auto scaling resources on your behalf.
+
+This role is referenced in the `infrastructure_role_arn` argument of the <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> resource. Without it, ECS cannot create or manage the shared load balancer and related infrastructure.
+
+<Aside type="note">
+  The `infrastructure_role_arn` is an immutable-at-create field. Changing it requires replacing the
+  entire Express Gateway Service.
+</Aside>
+
+## Terraform Configuration
+
+The following HCL defines the <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip> with the AWS-managed policy for Express Gateway Services and a trust policy scoped to your account using the `aws:SourceAccount` condition.
+
+```hcl title="main.tf"
+resource "aws_iam_role" "ecs_infrastructure" {
+  name = "${var.name}-ecs-infrastructure"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+        Condition = {
+          StringEquals = {
+            "aws:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_infrastructure" {
+  role       = aws_iam_role.ecs_infrastructure.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECSInfrastructureRoleforExpressGatewayServices"
+}
+```
+
+## Trust Policy
+
+The trust policy allows only the `ecs.amazonaws.com` service principal to assume this role. The `aws:SourceAccount` condition restricts assumption to requests originating from your specific AWS account, preventing cross-account confused deputy scenarios.
+
+<table>
+  <thead>
+    <tr>
+      <th>Element</th>
+      <th>Value</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Principal</td>
+      <td>
+        <code>ecs.amazonaws.com</code>
+      </td>
+      <td>ECS service assumes the role to manage infrastructure</td>
+    </tr>
+    <tr>
+      <td>Action</td>
+      <td>
+        <code>sts:AssumeRole</code>
+      </td>
+      <td>Allows the principal to obtain temporary credentials</td>
+    </tr>
+    <tr>
+      <td>Condition</td>
+      <td>
+        <code>aws:SourceAccount</code>
+      </td>
+      <td>Restricts to your account ID only</td>
+    </tr>
+  </tbody>
+</table>
+
+## Managed Policy
+
+The `AmazonECSInfrastructureRoleforExpressGatewayServices` AWS-managed policy grants permissions for ECS to provision and manage the <Tooltip term="Shared_ALB">Shared ALB</Tooltip>, target groups, listeners, auto scaling policies, and networking resources required by Express Mode services.
+
+<Aside type="tip">
+  Using the AWS-managed policy ensures your role stays up to date as Express Mode adds new
+  capabilities without requiring manual policy updates.
+</Aside>

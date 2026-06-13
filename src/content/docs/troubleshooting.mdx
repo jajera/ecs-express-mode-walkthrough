@@ -1,0 +1,193 @@
+---
+title: 'Troubleshooting'
+description: 'Diagnose and fix common ECS Express Mode deployment failures including rollback loops, health check issues, and 503 errors.'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../components/Tooltip.astro';
+
+## Symptom-to-Cause Reference
+
+Use this table to identify the likely cause of your deployment issue:
+
+<table>
+  <thead>
+    <tr>
+      <th>Symptom</th>
+      <th>Likely Cause</th>
+      <th>Where to Look</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Service spinning / rollback loops</td>
+      <td>
+        New tasks fail ALB health checks repeatedly, triggering{' '}
+        <Tooltip term="RollbackAlarm">RollbackAlarm</Tooltip>
+      </td>
+      <td>EC2 → Target Groups → Targets tab (health reason)</td>
+    </tr>
+    <tr>
+      <td>
+        503 errors from <Tooltip term="Application_URL">Application URL</Tooltip>
+      </td>
+      <td>No healthy targets registered in the target group</td>
+      <td>EC2 → Target Groups → Targets tab</td>
+    </tr>
+    <tr>
+      <td>Private DNS resolution failure</td>
+      <td>
+        <Tooltip term="VPC">VPC</Tooltip> DNS support or hostnames not enabled
+      </td>
+      <td>
+        VPC settings: <code>enable_dns_support</code>, <code>enable_dns_hostnames</code>
+      </td>
+    </tr>
+    <tr>
+      <td>Health status "Unknown" on Tasks tab</td>
+      <td>Normal and expected — Express Mode does not define container-level healthCheck</td>
+      <td>No action needed (see explanation below)</td>
+    </tr>
+    <tr>
+      <td>Target group unhealthy</td>
+      <td>
+        <Tooltip term="Security_Group">Security group</Tooltip> missing ingress, container crash,
+        wrong health path, or port mismatch
+      </td>
+      <td>EC2 → Target Groups → health reason column</td>
+    </tr>
+    <tr>
+      <td>Deployment rollback</td>
+      <td>ALB health checks fail within the deregistration delay, RollbackAlarm fires</td>
+      <td>ECS → Service → Events/Timeline, CloudWatch Alarms</td>
+    </tr>
+  </tbody>
+</table>
+
+## Deployment Rollback Flow
+
+When a deployment fails, <Tooltip term="Express_Gateway_Service">Express Mode</Tooltip> follows a predictable rollback cycle:
+
+1. New tasks start with the updated task definition
+2. The <Tooltip term="Shared_ALB">ALB</Tooltip> health checks the new targets on the configured `health_check_path`
+3. Health checks fail (target returns non-200 or connection refused)
+4. The <Tooltip term="RollbackAlarm">RollbackAlarm</Tooltip> fires after the evaluation period
+5. Express Mode rolls back to the previous stable deployment
+6. The cycle repeats on the next deployment attempt until the root cause is fixed
+
+<Aside type="caution">
+  Rollback loops will continue indefinitely. Express Mode does not stop retrying — you must fix the
+  underlying issue before the next deployment succeeds.
+</Aside>
+
+![PLACEHOLDER: ECS Timeline showing rollback events](https://placeholder.test/ecs-timeline-rollback-events)
+
+## Debug Order for Failed Deployments
+
+When your service fails to deploy, follow this order to find the root cause quickly:
+
+### Step 1: EC2 Target Groups health reason
+
+Navigate to **EC2 → Target Groups → your target group → Targets tab**. The health reason column tells you exactly why targets are unhealthy:
+
+- **Request timeout** — container is not responding on the expected port
+- **Health checks failed** — container responded with non-200 status
+- **Target not in service** — task was deregistered or stopped
+
+![PLACEHOLDER: EC2 Target Groups → Targets (unhealthy) with reason](https://placeholder.test/ec2-target-groups-unhealthy-reason)
+
+### Step 2: CloudWatch Logs
+
+Check the ECS task log group for container startup errors. Look for:
+
+- Application crash stack traces
+- Missing environment variables
+- Port binding failures
+- Permission denied errors
+
+![PLACEHOLDER: CloudWatch Logs showing container startup error](https://placeholder.test/cloudwatch-logs-container-startup-error)
+
+### Step 3: ECS stopped task reason and exit code
+
+In the ECS console, go to **Cluster → Service → Tasks (stopped)** and check:
+
+- **Stopped reason** — why ECS stopped the task
+- **Exit code** — the container's exit code (non-zero indicates a crash)
+  - Exit code `1` — application error
+  - Exit code `137` — killed by OOM (out of memory)
+  - Exit code `139` — segmentation fault
+
+### Step 4: curl the health endpoint
+
+From a resource within the same <Tooltip term="VPC">VPC</Tooltip>, curl the health check path directly:
+
+```bash
+curl -v http://<task-private-ip>:<container-port>/health
+```
+
+This confirms whether the container is actually serving traffic on the expected port and path.
+
+<Aside type="tip">
+  If curl succeeds from inside the VPC but the target group shows unhealthy, the issue is likely a
+  security group rule — the ALB cannot reach the task on the container port.
+</Aside>
+
+## Common Root Causes
+
+These are the most frequent reasons for Express Mode health check failures:
+
+### Missing security group ingress
+
+The task <Tooltip term="Security_Group">security group</Tooltip> must allow inbound traffic on the container port from the <Tooltip term="VPC">VPC</Tooltip> CIDR block. The <Tooltip term="Shared_ALB">shared ALB</Tooltip> lives within the same VPC and routes health check probes to task IPs.
+
+```hcl title="main.tf"
+ingress {
+  from_port   = var.container_port
+  to_port     = var.container_port
+  protocol    = "tcp"
+  cidr_blocks = [aws_vpc.this.cidr_block]
+}
+```
+
+### Container exits on startup
+
+The container crashes before it can respond to health checks. Common causes:
+
+- Missing required environment variables
+- Database or dependency connection failures
+- Incorrect entrypoint command
+- Insufficient memory allocation
+
+### Wrong health_check_path
+
+The `health_check_path` in the <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> configuration must match an endpoint that returns HTTP 200. If your application uses `/healthz` but the config says `/health`, checks will fail with 404.
+
+### Port mismatch
+
+The `container_port` in the task definition must match the port your application actually listens on. If the app binds to port 8080 but `container_port` is set to 3000, the ALB cannot reach it.
+
+<Aside type="danger">
+  Port mismatches produce "Request timeout" in the target group health reason because the ALB sends
+  probes to a port with no listener. The container appears healthy from its own perspective but is
+  unreachable by the ALB.
+</Aside>
+
+## Health Status "Unknown" Is Expected
+
+When viewing the ECS Tasks tab, you may see **Health status: Unknown** for your Express Mode tasks. This is normal and expected behavior.
+
+<Tooltip term="Express_Gateway_Service">Express Mode</Tooltip> does not define a container-level
+`healthCheck` in the task definition. Instead, it relies entirely on ALB target group health checks
+to determine whether tasks are healthy. The "Unknown" status simply means ECS has no container-level
+health information — it does not indicate a problem.
+
+<Aside type="note">
+  Operational health for Express Mode services is determined by the ALB target group state, not the
+  ECS Health status column. Check EC2 → Target Groups → Targets for the actual health of your tasks.
+</Aside>
+
+To confirm your service is healthy:
+
+1. Navigate to **EC2 → Target Groups → Targets**
+2. Verify targets show status **healthy**
+3. The <Tooltip term="Application_URL">Application URL</Tooltip> is accessible and returns expected responses

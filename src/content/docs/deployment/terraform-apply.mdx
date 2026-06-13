@@ -1,0 +1,172 @@
+---
+title: 'Terraform Apply'
+description: 'Set Terraform variables, run terraform init and apply, and understand what Express Mode provisions during deployment.'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../../components/Tooltip.astro';
+
+## Setting Terraform Variables
+
+Before deploying, configure the Terraform variables in `terraform.tfvars`. The `terraform-aws-ecs-express-mode-demo` project exposes four input variables — all have defaults, so you only need to override values you want to change.
+
+Create a `terraform.tfvars` file in the repository root:
+
+```hcl title="terraform.tfvars"
+project     = "ecs-express-mode-demo"
+environment = "dev"
+aws_region  = "ap-southeast-2"
+vpc_cidr    = "10.42.0.0/16"
+```
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>project</code>
+      </td>
+      <td>string</td>
+      <td>
+        Project name used for resource naming and tagging. Lowercase alphanumeric characters and
+        hyphens only; 3–50 characters.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>environment</code>
+      </td>
+      <td>string</td>
+      <td>Deployment environment. Must be one of <code>dev</code>, <code>staging</code>, or <code>prod</code>.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aws_region</code>
+      </td>
+      <td>string</td>
+      <td>AWS region for resource deployment. Must support your chosen Bedrock foundation model.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>vpc_cidr</code>
+      </td>
+      <td>string</td>
+      <td>CIDR block for the VPC created by this project (for example, <code>10.42.0.0/16</code>).</td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="tip">
+  Choose an <code>aws_region</code> where your Bedrock foundation model is available. The{' '}
+  <code>project</code> name is applied to resource names and tags across the stack.
+</Aside>
+
+## Initializing Terraform
+
+Run `terraform init` to download provider plugins and initialize the working directory. This step fetches the AWS provider and prepares the local state:
+
+```bash
+terraform init
+```
+
+You should see output confirming that providers were installed and Terraform is ready:
+
+```text
+Initializing the backend...
+Initializing provider plugins...
+- Finding latest version of hashicorp/aws...
+- Installing hashicorp/aws...
+
+Terraform has been successfully initialized!
+```
+
+## Running Terraform Apply
+
+With variables configured and providers initialized, run `terraform apply` to create all resources:
+
+```bash
+terraform apply
+```
+
+Terraform displays a plan showing the resources it will create. Review the plan and type `yes` to confirm. The <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> resource triggers Express Mode to provision its managed infrastructure alongside your declared resources.
+
+<Aside type="note">
+  The apply typically takes 3–5 minutes. Most of the time is spent provisioning the ALB and waiting
+  for target group health checks to pass.
+</Aside>
+
+## What Express Mode Provisions
+
+When Terraform applies the <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> resource, ECS Express Mode automatically provisions several managed resources that you would otherwise configure manually with classic ECS:
+
+<table>
+  <thead>
+    <tr>
+      <th>Resource</th>
+      <th>What Express Mode Does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <Tooltip term="Shared_ALB">Application Load Balancer</Tooltip>
+      </td>
+      <td>
+        Creates or reuses a shared ALB in the VPC with Host header routing rules. Up to 25 Express
+        services share a single ALB.
+      </td>
+    </tr>
+    <tr>
+      <td>Target group</td>
+      <td>
+        Registers ECS tasks automatically and configures health checks using the{' '}
+        <code>health_check_path</code> you specify.
+      </td>
+    </tr>
+    <tr>
+      <td>Auto scaling</td>
+      <td>
+        Configures target tracking scaling based on the <code>auto_scaling_metric</code> (CPU or
+        memory), scaling between <code>min_task_count</code> and <code>max_task_count</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        DNS / <Tooltip term="Application_URL">Application URL</Tooltip>
+      </td>
+      <td>
+        Assigns a unique HTTPS endpoint on <code>*.ecs.&lt;region&gt;.on.aws</code> with a managed
+        TLS certificate — no Route 53 or ACM configuration required.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <Tooltip term="RollbackAlarm">Rollback alarm</Tooltip>
+      </td>
+      <td>
+        Creates a CloudWatch alarm that triggers automatic deployment rollback when new tasks fail
+        ALB health checks.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="caution">
+  You do not declare ALB, target group, listener, or auto scaling resources in your Terraform code
+  when using Express Mode. ECS manages these internally. Attempting to create them separately will
+  conflict with the managed resources.
+</Aside>
+
+## After Apply Completes
+
+Once `terraform apply` finishes successfully, Terraform outputs the <Tooltip term="Application_URL">Application URL</Tooltip> and other resource identifiers. The next step is verifying the service is healthy and accessible — covered on the [Verifying](/ecs-express-mode-walkthrough/deployment/verifying/) page.
+
+```bash
+terraform output
+```

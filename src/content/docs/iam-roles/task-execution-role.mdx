@@ -1,0 +1,124 @@
+---
+title: 'Task Execution Role'
+description: 'IAM role for ECS task execution with image pull and log permissions using ecs-tasks.amazonaws.com trust.'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../../components/Tooltip.astro';
+
+## Overview
+
+The <Tooltip term="Task_Execution_Role">Task Execution Role</Tooltip> is assumed by the ECS agent on your behalf to pull container images from ECR and write logs to CloudWatch. This role is referenced in the task definition's `executionRoleArn` field and is required for any ECS task that uses private container images or CloudWatch logging.
+
+<Aside type="note">
+  This role is distinct from the Task Role, which grants permissions to the running container
+  application. The Task Execution Role only handles infrastructure-level operations performed by the
+  ECS agent.
+</Aside>
+
+## Terraform Configuration
+
+The following HCL defines the <Tooltip term="Task_Execution_Role">Task Execution Role</Tooltip> with an assume role policy trusting `ecs-tasks.amazonaws.com` and an `aws:SourceAccount` condition to prevent cross-account confused deputy attacks.
+
+```hcl title="main.tf"
+resource "aws_iam_role" "task_execution" {
+  name = "${var.name}-task-execution"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+        Condition = {
+          StringEquals = {
+            "aws:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "task_execution" {
+  role       = aws_iam_role.task_execution.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+```
+
+## Policy Attachment
+
+The `AmazonECSTaskExecutionRolePolicy` AWS managed policy grants permissions to:
+
+<table>
+  <thead>
+    <tr>
+      <th>Permission</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>ecr:GetAuthorizationToken</code>
+      </td>
+      <td>Authenticate to Amazon ECR to pull images</td>
+    </tr>
+    <tr>
+      <td>
+        <code>ecr:BatchGetImage</code>
+      </td>
+      <td>Download container image layers</td>
+    </tr>
+    <tr>
+      <td>
+        <code>ecr:GetDownloadUrlForLayer</code>
+      </td>
+      <td>Retrieve image layer download URLs</td>
+    </tr>
+    <tr>
+      <td>
+        <code>logs:CreateLogStream</code>
+      </td>
+      <td>Create CloudWatch log streams for task output</td>
+    </tr>
+    <tr>
+      <td>
+        <code>logs:PutLogEvents</code>
+      </td>
+      <td>Write container stdout/stderr to CloudWatch Logs</td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="tip">
+  Using the AWS managed policy is the recommended approach. Avoid creating custom policies that
+  duplicate these permissions unless you need additional restrictions.
+</Aside>
+
+## Trust Policy Details
+
+The trust relationship specifies `ecs-tasks.amazonaws.com` as the trusted principal. The `aws:SourceAccount` condition ensures only ECS tasks running in your own AWS account can assume this role, preventing confused deputy scenarios in multi-account environments.
+
+<Aside type="caution">
+  Without the <code>aws:SourceAccount</code> condition, any ECS task in any account could
+  potentially assume this role if they knew the role ARN. Always include this condition for defense
+  in depth.
+</Aside>
+
+## Usage in Express Gateway Service
+
+The <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> references this role through the task definition. ECS uses it during task startup to pull the container image and configure log routing before handing control to the application container.
+
+```hcl title="main.tf"
+resource "aws_ecs_express_gateway_service" "this" {
+  # ...
+  primary_container {
+    # ...
+    execution_role_arn = aws_iam_role.task_execution.arn
+  }
+}
+```

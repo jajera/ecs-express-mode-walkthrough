@@ -1,0 +1,115 @@
+---
+title: 'When to Use Express Mode'
+description: 'Supported and unsupported scenarios for ECS Express Mode, including protocol boundaries and workload fit guidance.'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../../components/Tooltip.astro';
+
+## Supported Scenarios
+
+The <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> is purpose-built for stateless HTTP/HTTPS workloads. If your application fits one of the following patterns, Express Mode is a strong choice:
+
+- **HTTPS web applications** — stateless frontends, server-rendered pages, single-page app backends served over HTTPS
+- **REST and OpenAPI APIs** — request/response services that communicate over HTTP/HTTPS and return JSON or similar payloads
+- **Rapid prototyping** — spin up a publicly accessible service without manually wiring ALB, target groups, listeners, and DNS
+- **Developer self-service** — teams that want a simplified deployment path without managing infrastructure resources directly
+
+Express Mode handles ALB provisioning, TLS termination, auto scaling, health checks, and the public <Tooltip term="Application_URL">Application URL</Tooltip> automatically. You define your container and scaling parameters — Express Mode does the rest.
+
+<Aside type="tip">
+  Express Mode works best when you want a publicly accessible HTTPS endpoint with minimal
+  infrastructure code. If you need fine-grained control over networking or protocols beyond HTTP,
+  classic ECS is the better fit.
+</Aside>
+
+## Unsupported Scenarios
+
+Express Mode is not suitable for workloads that do not communicate over HTTP/HTTPS. The following patterns require classic ECS with separately managed infrastructure:
+
+- **Batch workers** — long-running jobs that process items from a queue or on a schedule without exposing an HTTP endpoint
+- **gRPC services** — gRPC requires HTTP/2 end-to-end; ALB terminates HTTP/2 at the listener and forwards as HTTP/1.1, breaking gRPC streaming
+- **Raw TCP/UDP** — Express Mode only supports HTTP/HTTPS traffic through its <Tooltip term="Shared_ALB">Shared ALB</Tooltip>; TCP/UDP workloads need a Network Load Balancer
+- **Queue consumers** — SQS, Kafka, or Kinesis consumers that poll for messages do not need an HTTP endpoint and gain nothing from Express Mode's ALB
+- **Non-HTTP services** — any service that does not accept inbound HTTP requests (background processors, cron jobs, event-driven functions)
+
+<Aside type="caution">
+  Deploying a non-HTTP workload with Express Mode will result in perpetual health check failures and
+  deployment rollback loops. The managed ALB expects your container to respond to HTTP health checks
+  on the configured path.
+</Aside>
+
+## Protocol Boundaries
+
+The table below shows how different protocols and workload types map to Express Mode support. Use this as a quick reference when evaluating whether your application is a fit.
+
+<table>
+  <thead>
+    <tr>
+      <th>Protocol / Workload</th>
+      <th>Express Mode Fit</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>REST / OpenAPI</td>
+      <td>Primary fit</td>
+      <td>Designed for this — full ALB routing, TLS termination, auto scaling</td>
+    </tr>
+    <tr>
+      <td>WebSockets / SSE</td>
+      <td>Possible with caveats</td>
+      <td>
+        ALB supports WebSocket upgrade, but idle timeouts and connection draining may require tuning
+      </td>
+    </tr>
+    <tr>
+      <td>gRPC</td>
+      <td>Limited on ALB</td>
+      <td>
+        ALB downgrades HTTP/2 to HTTP/1.1 on target connections — gRPC streaming will not work
+        correctly
+      </td>
+    </tr>
+    <tr>
+      <td>TCP / UDP</td>
+      <td>Not supported</td>
+      <td>
+        Express Mode provisions an ALB (Layer 7 only) — use NLB with classic ECS for Layer 4 traffic
+      </td>
+    </tr>
+    <tr>
+      <td>Batch / Workers</td>
+      <td>Wrong tool</td>
+      <td>
+        No HTTP endpoint needed — use classic ECS without a load balancer, or ECS Scheduled Tasks
+      </td>
+    </tr>
+    <tr>
+      <td>ARM / Graviton</td>
+      <td>Defaults to X86_64</td>
+      <td>
+        Express Mode defaults to X86_64 runtime platform; specify <code>runtime_platform</code> in
+        task definition for ARM
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="note">
+  The "Limited on ALB" rating for gRPC means that unary (single request/response) gRPC calls may
+  work, but streaming RPCs will fail because the ALB does not maintain end-to-end HTTP/2 connections
+  to targets.
+</Aside>
+
+## Making the Decision
+
+When evaluating whether to use Express Mode or classic ECS, ask these questions:
+
+1. **Does my application serve HTTP/HTTPS traffic?** If no, use classic ECS.
+2. **Do I need gRPC streaming or raw TCP/UDP?** If yes, use classic ECS with an NLB.
+3. **Do I need the ALB in public subnets but tasks in private subnets?** If yes, use classic ECS — Express Mode uses a single subnet list for both.
+4. **Do I want minimal infrastructure code and fast time-to-deploy?** If yes and your workload is HTTP-based, Express Mode is the right choice.
+
+For workloads that fit Express Mode, you get automatic ALB provisioning, TLS, auto scaling, health checks, and a unique <Tooltip term="Application_URL">Application URL</Tooltip> — all from a single Terraform resource.

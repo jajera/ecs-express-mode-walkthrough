@@ -1,0 +1,161 @@
+---
+title: Overview
+description: What ECS Express Mode is, the demo architecture, and what this walkthrough covers.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../components/Tooltip.astro';
+
+## What is ECS Express Mode?
+
+<Tooltip term="Express_Gateway_Service">ECS Express Mode</Tooltip> is a simplified deployment model
+for Amazon ECS. It lets you deploy stateless HTTP/HTTPS containers without provisioning separate
+ALB, target group, listener, or auto scaling resources.
+
+Your entire service infrastructure becomes one Terraform resource:
+
+```hcl title="main.tf"
+resource "aws_ecs_express_gateway_service" "this" {
+  service_name            = "my-service"
+  cluster                 = aws_ecs_cluster.this.arn
+  task_definition         = aws_ecs_task_definition.this.arn
+  infrastructure_role_arn = aws_iam_role.infrastructure.arn
+
+  primary_container {
+    container_name    = "app"
+    container_port    = 8000
+    health_check_path = "/health"
+  }
+
+  network_configuration {
+    subnets         = aws_subnet.public[*].id
+    security_groups = [aws_security_group.web.id]
+    access_type     = "PUBLIC"
+  }
+
+  scaling_target {
+    auto_scaling_metric       = "CPU"
+    auto_scaling_target_value = 70
+    min_task_count            = 1
+    max_task_count            = 4
+  }
+}
+```
+
+That's it. No ALB resource, no target group, no listener rules, no scaling policies.
+
+## The demo application
+
+This walkthrough documents a working project: a <Tooltip term="Bedrock">Bedrock</Tooltip>-powered image analysis API that:
+
+1. Runs a FastAPI container with a `/health` endpoint and Swagger UI at `/docs`
+2. Accepts image uploads and returns AI-generated descriptions via <Tooltip term="Foundation_Model">Claude</Tooltip>
+3. Deploys to a public HTTPS endpoint with auto scaling and health-check-driven rollback
+4. Uses a single `terraform apply` to provision the entire stack
+
+## What Terraform manages
+
+<table>
+  <thead>
+    <tr>
+      <th>Resource</th>
+      <th>Purpose</th>
+      <th>File</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>aws_ecs_express_gateway_service</code>
+      </td>
+      <td>Service with managed ALB, scaling, health checks</td>
+      <td>
+        <code>main.tf</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>aws_ecs_cluster</code>
+      </td>
+      <td>Fargate-backed cluster</td>
+      <td>
+        <code>main.tf</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>aws_ecs_task_definition</code>
+      </td>
+      <td>Container image, port, environment</td>
+      <td>
+        <code>main.tf</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>aws_vpc</code> + subnets
+      </td>
+      <td>Network with public subnets and IGW</td>
+      <td>
+        <code>main.tf</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>aws_security_group</code>
+      </td>
+      <td>VPC CIDR ingress on container port</td>
+      <td>
+        <code>main.tf</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>aws_iam_role</code> (×3)
+      </td>
+      <td>Task execution, infrastructure, task roles</td>
+      <td>
+        <code>main.tf</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## What this walkthrough covers
+
+<table>
+  <thead>
+    <tr>
+      <th>Section</th>
+      <th>Content</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ECS Express Mode</td>
+      <td>Concepts, Express Gateway Service resource, auto scaling, health checks</td>
+    </tr>
+    <tr>
+      <td>IAM Roles</td>
+      <td>Three-role model, trust policies, Bedrock permissions</td>
+    </tr>
+    <tr>
+      <td>Networking</td>
+      <td>VPC layout, security groups, public subnets, ingress configuration</td>
+    </tr>
+    <tr>
+      <td>Deployment</td>
+      <td>Terraform apply, verifying health, accessing the web UI</td>
+    </tr>
+    <tr>
+      <td>Troubleshooting</td>
+      <td>Rollback loops, health check failures, common root causes</td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="note">
+  This walkthrough documents
+  [terraform-aws-ecs-express-mode-demo](https://github.com/jajera/terraform-aws-ecs-express-mode-demo).
+  Clone that repo to follow along with deployment steps.
+</Aside>

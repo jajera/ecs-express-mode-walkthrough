@@ -1,0 +1,241 @@
+---
+title: Express Gateway Service
+description: Complete HCL reference for aws_ecs_express_gateway_service with block-by-block explanations.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../../components/Tooltip.astro';
+
+## Overview
+
+The <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> is the core Terraform resource. It replaces the typical combination of `aws_ecs_service`, `aws_lb`, `aws_lb_target_group`, and `aws_lb_listener` with a single resource.
+
+<Aside type="note">
+  The complete resource definition below is from the
+  [terraform-aws-ecs-express-mode-demo](https://github.com/jajera/terraform-aws-ecs-express-mode-demo)
+  source repository.
+</Aside>
+
+```hcl title="main.tf"
+resource "aws_ecs_express_gateway_service" "this" {
+  service_name            = "${var.prefix}-service"
+  cluster                 = aws_ecs_cluster.this.arn
+  task_definition         = aws_ecs_task_definition.this.arn
+  infrastructure_role_arn = aws_iam_role.infrastructure.arn
+  desired_count           = 1
+
+  primary_container {
+    container_name    = "${var.prefix}-container"
+    container_port    = 8000
+    health_check_path = "/health"
+  }
+
+  network_configuration {
+    subnets         = aws_subnet.public[*].id
+    security_groups = [aws_security_group.web.id]
+    access_type     = "PUBLIC"
+  }
+
+  scaling_target {
+    auto_scaling_metric       = "CPU"
+    auto_scaling_target_value = 70
+    min_task_count            = 1
+    max_task_count            = 4
+  }
+}
+```
+
+## Primary Container
+
+Defines how the <Tooltip term="Shared_ALB">managed ALB</Tooltip> routes traffic to your application:
+
+```hcl title="main.tf"
+primary_container {
+  container_name    = "${var.prefix}-container"
+  container_port    = 8000
+  health_check_path = "/health"
+}
+```
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>container_name</code>
+      </td>
+      <td>
+        Must match the <code>name</code> field in the task definition's container definitions
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>container_port</code>
+      </td>
+      <td>Port the container listens on — ALB forwards traffic here</td>
+    </tr>
+    <tr>
+      <td>
+        <code>health_check_path</code>
+      </td>
+      <td>HTTP path the ALB uses to verify the container is healthy</td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="caution">
+  A mismatch between <code>container_port</code> and the application's actual listen port is the
+  most common cause of health check failures and rollback loops.
+</Aside>
+
+## Network Configuration
+
+Determines where tasks run and how the ALB is provisioned:
+
+```hcl title="main.tf"
+network_configuration {
+  subnets         = aws_subnet.public[*].id
+  security_groups = [aws_security_group.web.id]
+  access_type     = "PUBLIC"
+}
+```
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>subnets</code>
+      </td>
+      <td>Single list for both ALB and task placement — no split supported</td>
+    </tr>
+    <tr>
+      <td>
+        <code>security_groups</code>
+      </td>
+      <td>
+        Must allow ingress on <code>container_port</code> from the <Tooltip term="VPC">VPC</Tooltip>{' '}
+        <Tooltip term="CIDR_Block">CIDR</Tooltip>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>access_type</code>
+      </td>
+      <td>
+        <code>PUBLIC</code> = internet-facing ALB; <code>PRIVATE</code> = internal ALB
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## Scaling Target
+
+Configures auto scaling so the service adjusts capacity based on load:
+
+```hcl title="main.tf"
+scaling_target {
+  auto_scaling_metric       = "CPU"
+  auto_scaling_target_value = 70
+  min_task_count            = 1
+  max_task_count            = 4
+}
+```
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>auto_scaling_metric</code>
+      </td>
+      <td>
+        Metric for target tracking — <code>CPU</code> or <code>Memory</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>auto_scaling_target_value</code>
+      </td>
+      <td>Target percentage — scales out when exceeded</td>
+    </tr>
+    <tr>
+      <td>
+        <code>min_task_count</code>
+      </td>
+      <td>Minimum running tasks — never scales below this</td>
+    </tr>
+    <tr>
+      <td>
+        <code>max_task_count</code>
+      </td>
+      <td>Maximum running tasks — ceiling for scale-out</td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="tip">
+  The scaling target is built into the resource — no separate <code>aws_appautoscaling_target</code>{' '}
+  or policy resources needed.
+</Aside>
+
+## Top-Level Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>service_name</code>
+      </td>
+      <td>Immutable after creation — changing requires service replacement</td>
+    </tr>
+    <tr>
+      <td>
+        <code>cluster</code>
+      </td>
+      <td>ARN of the ECS cluster</td>
+    </tr>
+    <tr>
+      <td>
+        <code>task_definition</code>
+      </td>
+      <td>ARN of the task definition describing the container(s)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>infrastructure_role_arn</code>
+      </td>
+      <td>
+        <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip> granting ECS permission to
+        provision ALB and scaling
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>desired_count</code>
+      </td>
+      <td>Initial task count — auto scaling adjusts this between min and max</td>
+    </tr>
+  </tbody>
+</table>

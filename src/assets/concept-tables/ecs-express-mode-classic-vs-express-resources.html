@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        width: 1536px;
+        background: #ffffff;
+        font-family: Segoe UI, Helvetica Neue, Arial, sans-serif;
+        color: #111111;
+      }
+      .frame {
+        width: 1536px;
+        padding: 32px;
+      }
+      table {
+        width: 1472px;
+        height: auto;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid #d1d5db;
+        border-radius: 12px;
+        overflow: hidden;
+        table-layout: fixed;
+      }
+      thead th {
+        background: #2563b0;
+        color: #ffffff;
+        font-size: 32px;
+        font-weight: 700;
+        text-align: center;
+      tbody td {
+        background: #ffffff;
+        border-top: 1px solid #d1d5db;
+        vertical-align: middle;
+        padding: 16px 24px;
+        font-size: 30px;
+        line-height: 1.35;
+      }
+      tbody td.left {
+        width: 620px;
+        font-weight: 400;
+        border-right: 1px solid #d1d5db;
+      }
+      tbody td.right {
+        font-weight: 400;
+      }
+      code {
+        font-family: Consolas, Monaco, Courier New, monospace;
+        font-size: 30px;
+      }
+      tbody td.right p {
+        margin-top: 12px;
+        font-size: 30px;
+        line-height: 1.35;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <table>
+        <thead>
+          <tr>
+            <th>Classic ECS</th>
+            <th>Express Mode</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="left"><code>aws_lb</code></td>
+          <td class="right" rowspan="5">
+                  <code>aws_ecs_express_gateway_service</code>
+                  <p>Managed ALB, target group, listener, service wiring, and auto scaling</p>
+                </td>
+        </tr>
+        <tr>
+          <td class="left"><code>aws_lb_target_group</code></td>
+          
+        </tr>
+        <tr>
+          <td class="left"><code>aws_lb_listener</code></td>
+          
+        </tr>
+        <tr>
+          <td class="left"><code>aws_ecs_service</code></td>
+          
+        </tr>
+        <tr>
+          <td class="left"><code>aws_appautoscaling_target</code></td>
+          
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
