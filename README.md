@@ -1,5 +1,8 @@
 # ecs-express-mode-walkthrough
 
+[![Deploy to GitHub Pages](https://github.com/jajera/ecs-express-mode-walkthrough/actions/workflows/deploy.yml/badge.svg)](https://github.com/jajera/ecs-express-mode-walkthrough/actions/workflows/deploy.yml)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://jajera.github.io/ecs-express-mode-walkthrough/)
+
 ECS Express Mode by example
 
 Documentation for [terraform-aws-ecs-express-mode-demo](https://github.com/jajera/terraform-aws-ecs-express-mode-demo) — learn AWS ECS Express Mode by example through a minimal Express Gateway Service deployment with Terraform, managed ALB, auto scaling, and Bedrock.
