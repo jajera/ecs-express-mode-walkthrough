@@ -1,0 +1,125 @@
+---
+title: 'Limitations'
+description: 'Express Mode constraints including immutable fields, single subnet model, and Shared ALB type determination.'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../../components/Tooltip.astro';
+
+## Immutable-at-Create Fields
+
+Several configuration fields in the <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> are set once at creation time and cannot be modified afterward. Changing any of these requires destroying the service and recreating it from scratch.
+
+<Aside type="caution">
+  Modifying an immutable field means replacing the entire Express service. Plan these values
+  carefully before your first deployment.
+</Aside>
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Description</th>
+      <th>Impact of Change</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>service_name</code>
+      </td>
+      <td>The name identifying your ECS service</td>
+      <td>Service replacement required</td>
+    </tr>
+    <tr>
+      <td>
+        <code>cluster</code>
+      </td>
+      <td>The ECS cluster hosting the service</td>
+      <td>Service replacement required</td>
+    </tr>
+    <tr>
+      <td>
+        <code>infrastructure_role_arn</code>
+      </td>
+      <td>
+        The <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip> ARN granting Express
+        Mode permissions
+      </td>
+      <td>Service replacement required</td>
+    </tr>
+    <tr>
+      <td>Deployment strategy</td>
+      <td>Rolling update configuration (Express Mode default)</td>
+      <td>Service replacement required</td>
+    </tr>
+    <tr>
+      <td>Load balancer config</td>
+      <td>
+        The <Tooltip term="Shared_ALB">Shared ALB</Tooltip> target group and listener settings
+      </td>
+      <td>Service replacement required</td>
+    </tr>
+  </tbody>
+</table>
+
+In Terraform, attempting to change any of these fields triggers a `forces replacement` plan — the existing service is destroyed and a new one is created. This causes downtime because the ALB target group and DNS routing are rebuilt.
+
+## Single Subnet Constraint
+
+Express Mode uses a single subnet list for both the managed ALB and your tasks. Unlike classic ECS where you can place the ALB in public subnets and run tasks in private subnets, Express Mode does not support this split configuration.
+
+The subnet type you choose determines the ALB type and accessibility:
+
+<table>
+  <thead>
+    <tr>
+      <th>Subnet Type</th>
+      <th>ALB Result</th>
+      <th>Task IPs</th>
+      <th>Accessible From</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <Tooltip term="Public_Subnet">Public subnets</Tooltip> (route to IGW)
+      </td>
+      <td>Internet-facing ALB</td>
+      <td>Public IPs assigned</td>
+      <td>The public internet</td>
+    </tr>
+    <tr>
+      <td>Private subnets (no IGW route)</td>
+      <td>Internal ALB</td>
+      <td>Private IPs only</td>
+      <td>
+        Within the <Tooltip term="VPC">VPC</Tooltip> only
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="note">
+  There is no ALB-in-public plus tasks-in-private option with Express Mode. If your architecture
+  requires public ingress with private compute, use classic ECS with a separately managed ALB and
+  distinct subnet assignments for each.
+</Aside>
+
+## Shared ALB Type Determination
+
+The first <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> deployed in a <Tooltip term="VPC">VPC</Tooltip> determines whether the <Tooltip term="Shared_ALB">Shared ALB</Tooltip> is internet-facing or internal. All subsequent Express services in that same VPC share this ALB and inherit its type.
+
+This means:
+
+- If your first Express service uses public subnets, the Shared ALB becomes internet-facing — all future Express services in that VPC will also be internet-facing.
+- If your first Express service uses private subnets, the Shared ALB becomes internal — all future Express services in that VPC will only be reachable within the VPC.
+
+<Aside type="caution">
+  You cannot mix internet-facing and internal Express services in the same VPC. Plan your first
+  Express service subnet choice knowing it locks the ALB type for all Express services in that VPC.
+</Aside>
+
+To change the Shared ALB type, you must remove all Express services in the VPC and redeploy the first one with the desired subnet type.
+
+![PLACEHOLDER: ECS console Express Mode sidebar (create-only wizard)](https://placeholder.test/ecs-console-express-mode-sidebar-create-only-wizard.png)

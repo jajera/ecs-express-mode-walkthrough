@@ -1,0 +1,230 @@
+---
+title: 'Verifying the Service'
+description: 'Confirm your Express Mode deployment is healthy by checking Terraform outputs, the health check URL, and ECS task status.'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../../components/Tooltip.astro';
+import ecsServiceResourcesTab from '../../../assets/screenshots/deployment/ecs-service-resources-tab-application-url-alb-target-groups.png';
+import ec2TargetGroupsTargetsHealthy from '../../../assets/screenshots/deployment/ec2-target-groups-targets-healthy.png';
+
+## Retrieving Terraform Outputs
+
+After `terraform apply` completes, run `terraform output` to retrieve the deployment endpoints and resource identifiers:
+
+```bash
+terraform output
+```
+
+Example output:
+
+```text
+aws_region = "ap-southeast-2"
+bedrock_max_tokens = 1024
+bedrock_model_id = "au.anthropic.claude-sonnet-4-6"
+cluster_name = "ecs-express-mode-demo-glm6pm-cluster"
+container_image = "ghcr.io/platformfuzz/bedrock-image-analyzer:latest"
+health_check_path = "/health"
+health_check_url = "https://ec-04256d75ab0d4ba394bc90a351df08b0.ecs.ap-southeast-2.on.aws/health"
+public_subnet_ids = [
+  "subnet-01068991d9e01116f",
+  "subnet-0b496507884f466e7",
+]
+service_access_type = "PUBLIC"
+service_name = "ecs-express-mode-demo-glm6pm-web"
+service_url = "https://ec-04256d75ab0d4ba394bc90a351df08b0.ecs.ap-southeast-2.on.aws"
+vpc_id = "vpc-0ad6532587641ddce"
+web_ui_url = "https://ec-04256d75ab0d4ba394bc90a351df08b0.ecs.ap-southeast-2.on.aws/docs"
+```
+
+<table>
+  <thead>
+    <tr>
+      <th>Output</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>aws_region</code>
+      </td>
+      <td>AWS region where resources are deployed</td>
+    </tr>
+    <tr>
+      <td>
+        <code>service_url</code>
+      </td>
+      <td>
+        <Tooltip term="Application_URL">HTTPS endpoint</Tooltip> for the web service on{' '}
+        <code>*.ecs.&lt;region&gt;.on.aws</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>service_access_type</code>
+      </td>
+      <td>Ingress access type — <code>PUBLIC</code> (internet-facing) or <code>PRIVATE</code> (VPC-internal only)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>health_check_path</code>
+      </td>
+      <td>HTTP path the Express Mode load balancer uses for target health checks</td>
+    </tr>
+    <tr>
+      <td>
+        <code>health_check_url</code>
+      </td>
+      <td>Full URL the load balancer polls for target health checks</td>
+    </tr>
+    <tr>
+      <td>
+        <code>web_ui_url</code>
+      </td>
+      <td>Swagger UI for the image analysis API — open in a browser; the root URL returns 404</td>
+    </tr>
+    <tr>
+      <td>
+        <code>cluster_name</code>
+      </td>
+      <td>Name of the ECS cluster hosting the web service</td>
+    </tr>
+    <tr>
+      <td>
+        <code>service_name</code>
+      </td>
+      <td>Name of the ECS Express Mode web service</td>
+    </tr>
+    <tr>
+      <td>
+        <code>container_image</code>
+      </td>
+      <td>Container image URI used by the web service</td>
+    </tr>
+    <tr>
+      <td>
+        <code>bedrock_model_id</code>
+      </td>
+      <td>Bedrock model or inference profile ID configured on the container</td>
+    </tr>
+    <tr>
+      <td>
+        <code>bedrock_max_tokens</code>
+      </td>
+      <td>Maximum Bedrock response tokens configured on the container</td>
+    </tr>
+    <tr>
+      <td>
+        <code>vpc_id</code>
+      </td>
+      <td>VPC ID created for ECS Express networking</td>
+    </tr>
+    <tr>
+      <td>
+        <code>public_subnet_ids</code>
+      </td>
+      <td>Public subnet IDs used by the web service and ALB</td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="tip">
+  Use <code>service_url</code> for API access and <code>web_ui_url</code> to open the Swagger UI in
+  a browser. The root URL returns 404 by design — the demo serves its UI at <code>/docs</code>.
+</Aside>
+
+## Verifying Health with curl
+
+Confirm the service is responding by curling the health check URL:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" "$(terraform output -raw health_check_url)"
+```
+
+You should receive an HTTP `200` response indicating the container is healthy and serving traffic through the <Tooltip term="Shared_ALB">Shared ALB</Tooltip>.
+
+<Aside type="note">
+  If you receive a <code>503</code> response, the service may still be starting. Wait 30–60 seconds
+  for the target group to register the tasks as healthy, then retry.
+</Aside>
+
+## Confirming Tasks Are Running
+
+Verify the ECS service has reached a steady state with desired count matching running count. Use the AWS CLI:
+
+```bash
+aws ecs describe-services \
+  --region "$(terraform output -raw aws_region)" \
+  --cluster "$(terraform output -raw cluster_name)" \
+  --services "$(terraform output -raw service_name)" \
+  --query "services[0].{desired:desiredCount,running:runningCount,pending:pendingCount}" \
+  --output table
+```
+
+The output should show `desired` equal to `running` and `pending` at zero. This confirms the <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> has launched successfully and all tasks passed the ALB health check.
+
+<Aside type="tip">
+  You can also verify this in the ECS console by navigating to your cluster, selecting the service,
+  and checking the <strong>Tasks</strong> tab. The number of running tasks should match the desired
+  count configured in the scaling target.
+</Aside>
+
+## Endpoint Outputs
+
+The demo exposes three URLs derived from the same Express-provisioned endpoint:
+
+<table>
+  <thead>
+    <tr>
+      <th>Output</th>
+      <th>Example path</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>service_url</code>
+      </td>
+      <td>
+        <code>/</code>
+      </td>
+      <td>Base HTTPS endpoint for API requests</td>
+    </tr>
+    <tr>
+      <td>
+        <code>health_check_url</code>
+      </td>
+      <td>
+        <code>/health</code>
+      </td>
+      <td>URL the ALB polls to determine target health</td>
+    </tr>
+    <tr>
+      <td>
+        <code>web_ui_url</code>
+      </td>
+      <td>
+        <code>/docs</code>
+      </td>
+      <td>Swagger UI — use this to interact with the API in a browser</td>
+    </tr>
+  </tbody>
+</table>
+
+## Health Status "Unknown" Is Expected
+
+When viewing the ECS Tasks tab in the console, you may notice the Health status column shows **Unknown** for all tasks. This is normal and expected.
+
+Express Mode does not define a container-level `healthCheck` in the task definition. Instead, operational health is determined entirely by the ALB target group health check configured via `health_check_path`. As long as the target group reports targets as **healthy**, the service is functioning correctly — the <Tooltip term="Application_URL">Application URL</Tooltip> remains accessible.
+
+<Aside type="note">
+  The "Health status: Unknown" indicator means ECS has no container-level health check to report
+  against — it does not indicate a problem. Check the EC2 Target Groups console to confirm actual
+  health. If targets show <strong>healthy</strong>, your deployment is working as intended.
+</Aside>
+
+<img src={ecsServiceResourcesTab.src} alt="ECS service Resources tab with application URL, ALB, and target groups" />
+
+<img src={ec2TargetGroupsTargetsHealthy.src} alt="EC2 Target Groups Targets tab showing healthy status" />

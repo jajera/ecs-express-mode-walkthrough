@@ -1,0 +1,77 @@
+---
+title: 'Security Groups'
+description: 'Web security group configuration with full egress and VPC CIDR-scoped ingress required for ECS Express Mode services.'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../../components/Tooltip.astro';
+
+## Overview
+
+ECS Express Mode places both the managed ALB and your tasks in the same subnets. The <Tooltip term="Security_Group">security group</Tooltip> attached to your tasks must allow inbound traffic from the ALB on the container port and permit all outbound traffic so tasks can reach AWS APIs, pull images, and respond to health checks.
+
+This page documents the web security group from the `terraform-aws-ecs-express-mode-demo` project — a minimal configuration scoped to the <Tooltip term="VPC">VPC</Tooltip> <Tooltip term="CIDR_Block">CIDR block</Tooltip> for ingress.
+
+## Security Group Resource
+
+The <Tooltip term="Security_Group">security group</Tooltip> is created within the <Tooltip term="VPC">VPC</Tooltip> and referenced by the <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> `network_configuration` block:
+
+```hcl title="main.tf"
+resource "aws_security_group" "web" {
+  name        = "${var.prefix}-web"
+  description = "Allow inbound traffic on container port from VPC CIDR"
+  vpc_id      = aws_vpc.this.id
+}
+```
+
+## Egress Rule
+
+The egress rule allows all outbound traffic from tasks to any destination. Tasks need unrestricted egress to pull container images from ECR, call AWS APIs (Bedrock, CloudWatch), and respond to ALB health checks:
+
+```hcl title="main.tf"
+resource "aws_vpc_security_group_egress_rule" "web_all" {
+  security_group_id = aws_security_group.web.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
+```
+
+The `-1` protocol value means all protocols are permitted. This is the standard pattern for ECS tasks that need outbound internet access.
+
+<Aside type="note">
+  Full egress (0.0.0.0/0) is required because tasks must reach multiple AWS service endpoints — ECR
+  for image pulls, CloudWatch for logging, and Bedrock for API calls. Restricting egress would
+  require VPC endpoints for each service.
+</Aside>
+
+## Ingress Rule
+
+The ingress rule limits inbound traffic to the <Tooltip term="VPC">VPC</Tooltip> <Tooltip term="CIDR_Block">CIDR block</Tooltip> on the container port. This allows the <Tooltip term="Shared_ALB">Shared ALB</Tooltip> (which lives in the same VPC) to forward requests to your tasks while blocking traffic from outside the VPC:
+
+```hcl title="main.tf"
+resource "aws_vpc_security_group_ingress_rule" "web_http" {
+  security_group_id = aws_security_group.web.id
+  cidr_ipv4         = aws_vpc.this.cidr_block
+  from_port         = var.container_port
+  to_port           = var.container_port
+  ip_protocol       = "tcp"
+}
+```
+
+The `container_port` variable matches the port defined in the ECS task definition — the port your application listens on. In the demo project this is port 8000 (the Bedrock-powered FastAPI application).
+
+<Aside type="tip">
+  Scoping ingress to the VPC CIDR instead of 0.0.0.0/0 follows least-privilege networking. The ALB
+  handles public internet traffic and forwards it to tasks within the VPC, so tasks never need
+  direct inbound access from the internet.
+</Aside>
+
+## Why This Configuration Is Required
+
+Express Mode needs this <Tooltip term="Security_Group">security group</Tooltip> configuration for the service to operate:
+
+- **Full egress** — tasks must reach ECR (image pulls), CloudWatch (logs), Bedrock (API calls), and the ALB health check responses must flow back. Without egress, tasks cannot start or remain healthy.
+- **<Tooltip term="VPC">VPC</Tooltip> CIDR ingress on the container port** — the <Tooltip term="Shared_ALB">Shared ALB</Tooltip> lives within the VPC and forwards traffic to tasks on the container port. If this ingress rule is missing, the ALB health checks fail, triggering the deployment rollback alarm and preventing the service from stabilizing.
+- **TCP protocol** — Express Mode handles HTTP/HTTPS web applications. The ALB communicates with targets over TCP on the specified port.
+
+Without the ingress rule, the <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> enters a rollback loop: tasks start, the ALB cannot reach the health check endpoint, health checks fail, the RollbackAlarm fires, and Express rolls back the deployment.

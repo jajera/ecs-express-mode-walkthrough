@@ -1,0 +1,114 @@
+---
+title: Prerequisites
+description: Required tools, AWS permissions, and Bedrock model access needed to deploy the ECS Express Mode demo.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../components/Tooltip.astro';
+
+## Required Tools
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Minimum Version</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Terraform</td>
+      <td>≥ 1.5</td>
+      <td>Infrastructure provisioning</td>
+    </tr>
+    <tr>
+      <td>AWS CLI</td>
+      <td>≥ 2.0</td>
+      <td>Authentication and resource verification</td>
+    </tr>
+  </tbody>
+</table>
+
+Verify your installed versions:
+
+```bash
+terraform version
+aws --version
+```
+
+## AWS Permissions
+
+Your AWS credentials must have permissions to create and manage:
+
+<table>
+  <thead>
+    <tr>
+      <th>Service</th>
+      <th>Resources</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Amazon ECS</td>
+      <td>
+        Cluster, <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip>, task
+        definitions
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <Tooltip term="VPC">VPC</Tooltip>
+      </td>
+      <td>
+        VPC, subnets, <Tooltip term="Internet_Gateway">internet gateway</Tooltip>, route tables,{' '}
+        <Tooltip term="Security_Group">security groups</Tooltip>
+      </td>
+    </tr>
+    <tr>
+      <td>IAM</td>
+      <td>
+        <Tooltip term="Task_Execution_Role">Task Execution Role</Tooltip>,{' '}
+        <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip>,{' '}
+        <Tooltip term="Task_Role">Task Role</Tooltip>
+      </td>
+    </tr>
+    <tr>
+      <td>Elastic Load Balancing</td>
+      <td>
+        <Tooltip term="Shared_ALB">Application Load Balancer</Tooltip> (managed by Express Mode)
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="tip">
+  An AdministratorAccess policy works for testing. For production, scope permissions to ECS, EC2,
+  IAM, and CloudWatch.
+</Aside>
+
+## Bedrock Model Access
+
+The demo uses Amazon <Tooltip term="Bedrock">Bedrock</Tooltip> for image analysis via a <Tooltip term="Foundation_Model">foundation model</Tooltip>. Two conditions must be met:
+
+### Marketplace Agreement
+
+1. Open the Amazon Bedrock console
+2. Navigate to **Model access**
+3. Request access to Anthropic Claude models
+4. Wait for status to show **Access granted**
+
+<Aside type="caution">
+  Model access is typically approved within minutes but can take up to 24 hours. Complete this
+  before running terraform apply.
+</Aside>
+
+### Regional Availability
+
+Your deployment region must support the chosen model. Check the [Bedrock model support by region](https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html) documentation.
+
+The demo uses an <Tooltip term="Inference_Profile">inference profile</Tooltip> to route requests to the correct endpoint.
+
+```hcl title="terraform.tfvars"
+region = "us-east-1"
+```

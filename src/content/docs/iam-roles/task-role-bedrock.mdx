@@ -1,0 +1,133 @@
+---
+title: 'Task Role — Bedrock Access'
+description: 'IAM Task Role granting the running container permissions to invoke Bedrock foundation models and inference profiles.'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../../components/Tooltip.astro';
+
+## Overview
+
+The <Tooltip term="Task_Role">Task Role</Tooltip> is an IAM role assumed by the running container at runtime. Unlike the Task Execution Role (which handles image pulls and log writes), the Task Role grants your application the permissions it needs to interact with AWS services. In this project, the container calls <Tooltip term="Bedrock">Amazon Bedrock</Tooltip> to run inference on foundation models, so the Task Role includes a policy that allows `bedrock:InvokeModel` on the required resource ARNs.
+
+## Trust Policy
+
+The <Tooltip term="Task_Role">Task Role</Tooltip> uses the same trust relationship as the Task Execution Role — it trusts `ecs-tasks.amazonaws.com` with an `aws:SourceAccount` condition to prevent cross-account confused deputy attacks.
+
+```hcl title="main.tf"
+resource "aws_iam_role" "task" {
+  name = "${var.name}-task"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+        Condition = {
+          StringEquals = {
+            "aws:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+        }
+      }
+    ]
+  })
+}
+```
+
+## Bedrock IAM Policy
+
+The inline policy grants `bedrock:InvokeModel` permission on <Tooltip term="Bedrock">Bedrock</Tooltip> resources with two distinct ARN patterns:
+
+```hcl title="main.tf"
+resource "aws_iam_role_policy" "task_bedrock" {
+  name = "${var.name}-bedrock"
+  role = aws_iam_role.task.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "bedrock:InvokeModel"
+        ]
+        Resource = [
+          "arn:aws:bedrock:*::foundation-model/*",
+          "arn:aws:bedrock:*:*:inference-profile/*"
+        ]
+      }
+    ]
+  })
+}
+```
+
+## Why Both ARN Patterns Are Required
+
+<Tooltip term="Foundation_Model">Foundation models</Tooltip> and
+<Tooltip term="Inference_Profile">inference profiles</Tooltip> use different ARN formats in
+<Tooltip term="Bedrock">Bedrock</Tooltip>
+because they represent different resource types with different ownership models.
+
+<table>
+  <thead>
+    <tr>
+      <th>Resource</th>
+      <th>ARN Pattern</th>
+      <th>Account Field</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Foundation Model</td>
+      <td>
+        <code>arn:aws:bedrock:*::foundation-model/*</code>
+      </td>
+      <td>Empty (no account)</td>
+      <td>Foundation models are AWS-managed global resources not owned by any customer account</td>
+    </tr>
+    <tr>
+      <td>Inference Profile</td>
+      <td>
+        <code>arn:aws:bedrock:*:*:inference-profile/*</code>
+      </td>
+      <td>Wildcard (any account)</td>
+      <td>
+        Inference profiles can be account-specific or cross-region, requiring the account field
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="note">
+  The foundation model ARN has an empty account field (double colon `::`) because these models are
+  owned by AWS, not by your account. Inference profiles include an account field because they can be
+  configured per-account for cross-region routing and model parameter customization.
+</Aside>
+
+If you only include the foundation model ARN, direct `InvokeModel` calls using a model ID work, but requests routed through an inference profile fail with an `AccessDeniedException`. Including both ARN patterns ensures the application can invoke models regardless of whether the request targets a model directly or goes through an inference profile.
+
+<Aside type="tip">
+  When the Bedrock SDK resolves a model identifier, it may route through a cross-region inference
+  profile transparently. Always include both ARN patterns to avoid unexpected access errors in
+  production.
+</Aside>
+
+## Role Attachment to the Express Gateway Service
+
+The <Tooltip term="Task_Role">Task Role</Tooltip> ARN is passed to the Express Gateway Service resource via the `primary_container` block, making it available to the running container as instance credentials:
+
+```hcl title="main.tf"
+resource "aws_ecs_express_gateway_service" "this" {
+  # ...
+
+  primary_container {
+    # ...
+    task_role_arn = aws_iam_role.task.arn
+  }
+}
+```

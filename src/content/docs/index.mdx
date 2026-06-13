@@ -1,0 +1,38 @@
+---
+title: ECS Express Mode Walkthrough
+description: Learn ECS Express Mode by example — a minimal Terraform deployment with managed ALB, auto scaling, and public HTTPS ingress.
+template: splash
+hero:
+  tagline: Deploy HTTP/HTTPS containers on ECS with a single Terraform resource — managed ALB, auto scaling, health checks, and a unique HTTPS URL included.
+  actions:
+    - text: Get Started
+      link: /ecs-express-mode-walkthrough/overview/
+      icon: right-arrow
+      variant: primary
+    - text: View Source
+      link: https://github.com/jajera/terraform-aws-ecs-express-mode-demo
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## What you'll learn
+
+<CardGrid>
+  <Card title="Express Mode concepts" icon="rocket">
+    What ECS Express Mode is, how it differs from classic ECS, supported workloads, and the single
+    subnet limitation.
+  </Card>
+  <Card title="Express Gateway Service" icon="setting">
+    The aws_ecs_express_gateway_service resource — primary container, networking, and auto scaling
+    in one block.
+  </Card>
+  <Card title="IAM and networking" icon="document">
+    Three-role IAM model, VPC layout, security groups, and public subnet configuration for Express
+    Mode.
+  </Card>
+  <Card title="Deploy and troubleshoot" icon="warning">
+    Terraform apply, health check verification, rollback diagnostics, and common failure root
+    causes.
+  </Card>
+</CardGrid>

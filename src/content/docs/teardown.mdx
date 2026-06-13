@@ -1,0 +1,68 @@
+---
+title: 'Teardown'
+description: 'Destroy the ECS Express Mode demo infrastructure with terraform destroy and verify all resources are removed.'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../components/Tooltip.astro';
+
+## Destroy the Infrastructure
+
+When you are finished exploring the demo, remove all provisioned resources by running `terraform destroy`. This tears down the <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip>, the <Tooltip term="Shared_ALB">shared ALB</Tooltip>, networking components, IAM roles, and the ECS cluster in the correct dependency order.
+
+```bash
+terraform destroy
+```
+
+Terraform prompts for confirmation before proceeding. Type `yes` to confirm. The destroy operation removes resources in reverse dependency order — the Express Gateway Service and its managed ALB are removed first, followed by IAM roles, security groups, subnets, and the <Tooltip term="VPC">VPC</Tooltip>.
+
+<Aside type="note">
+  The destroy operation typically takes 3–5 minutes. The longest wait is for the ALB and target
+  group to drain connections before deletion.
+</Aside>
+
+## Verify Resource Removal
+
+After `terraform destroy` completes, confirm Terraform no longer tracks any resources:
+
+```bash
+terraform state list
+```
+
+The command should produce no output. If any resources are listed, run `terraform destroy` again to remove them.
+
+<Aside type="tip">
+  You can also confirm in the ECS and EC2 consoles that the cluster, Express service, and load
+  balancer are gone.
+</Aside>
+
+## Troubleshooting Destroy Failures
+
+If `terraform destroy` fails or hangs, common causes include:
+
+<table>
+  <thead>
+    <tr>
+      <th>Symptom</th>
+      <th>Cause</th>
+      <th>Resolution</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Timeout waiting for ALB deletion</td>
+      <td>Active connections draining</td>
+      <td>Wait for drain to complete or manually deregister targets</td>
+    </tr>
+    <tr>
+      <td>VPC deletion fails</td>
+      <td>Dependent resources still exist (ENIs, security group references)</td>
+      <td>Remove dependent resources first, then retry destroy</td>
+    </tr>
+    <tr>
+      <td>IAM role deletion fails</td>
+      <td>Role still attached to running tasks</td>
+      <td>Stop all tasks in the cluster, then retry destroy</td>
+    </tr>
+  </tbody>
+</table>

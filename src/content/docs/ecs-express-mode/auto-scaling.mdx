@@ -1,0 +1,117 @@
+---
+title: Auto Scaling
+description: Configure target tracking auto scaling for ECS Express Mode using the scaling_target block.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Tooltip from '../../../components/Tooltip.astro';
+
+## Overview
+
+The <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> includes built-in target tracking auto scaling through the `scaling_target` block. Unlike classic ECS where you configure separate Application Auto Scaling resources, Express Mode handles the scaling infrastructure automatically.
+
+<Aside type="note">
+  Express Mode uses target tracking scaling exclusively. Step scaling and scheduled scaling are not
+  available.
+</Aside>
+
+## The scaling_target Block
+
+```hcl title="main.tf"
+resource "aws_ecs_express_gateway_service" "this" {
+  # ...
+
+  scaling_target {
+    auto_scaling_metric       = "CPU"
+    auto_scaling_target_value = 70
+    min_task_count            = 1
+    max_task_count            = 3
+  }
+}
+```
+
+## Parameter Reference
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Type</th>
+      <th>Allowed Values</th>
+      <th>Source Repo Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>auto_scaling_metric</code>
+      </td>
+      <td>string</td>
+      <td>
+        <code>"CPU"</code>, <code>"Memory"</code>
+      </td>
+      <td>
+        <code>"CPU"</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>auto_scaling_target_value</code>
+      </td>
+      <td>number</td>
+      <td>1–100 (percentage)</td>
+      <td>
+        <code>70</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>min_task_count</code>
+      </td>
+      <td>number</td>
+      <td>≥ 1</td>
+      <td>
+        <code>1</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>max_task_count</code>
+      </td>
+      <td>number</td>
+      <td>≥ min_task_count</td>
+      <td>
+        <code>3</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Aside type="tip">
+  The source repo uses CPU at 70%. For memory-intensive workloads like Bedrock inference, consider
+  using Memory instead.
+</Aside>
+
+## How Target Tracking Works
+
+When you set `auto_scaling_metric = "CPU"` and `auto_scaling_target_value = 70`, Express Mode:
+
+1. Monitors average CPU utilization across all running tasks
+2. Adds tasks when average exceeds 70%
+3. Removes tasks when average drops below 70% (with cooldown)
+4. Maintains count between `min_task_count` and `max_task_count`
+
+<Aside type="caution">
+  Setting <code>min_task_count</code> to 1 means no redundancy during scale-in. For production,
+  consider a minimum of 2 to maintain availability during task replacements.
+</Aside>
+
+## Express Mode vs Classic Auto Scaling
+
+Classic ECS requires multiple resources for auto scaling:
+
+- `aws_appautoscaling_target` — registers the service as scalable
+- `aws_appautoscaling_policy` — defines the tracking policy
+- CloudWatch alarms — created automatically by the policy
+
+With Express Mode, the `scaling_target` block replaces all of these. Express Mode also provisions the <Tooltip term="RollbackAlarm">RollbackAlarm</Tooltip> that triggers deployment rollback when new tasks fail health checks.

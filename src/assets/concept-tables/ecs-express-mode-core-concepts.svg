@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1024" viewBox="0 0 1536 1024">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <foreignObject x="80" y="80" width="1376" height="864">
+    <div xmlns="http://www.w3.org/1999/xhtml"><table>
+      <thead>
+        <tr>
+          <th>ECS Express Mode — Core Concepts</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="term">Express Gateway Service:</td>
+          <td class="desc">Single Terraform resource (<code>aws_ecs_express_gateway_service</code>) that provisions the entire HTTP/HTTPS stack.</td>
+        </tr>
+        <tr>
+          <td class="term">Managed ALB:</td>
+          <td class="desc">ECS provisions a Shared Application Load Balancer — no separate <code>aws_lb</code>, target group, or listener resources.</td>
+        </tr>
+        <tr>
+          <td class="term">Health Checks:</td>
+          <td class="desc">ALB target group health checks configured via <code>health_check_path</code> on the express gateway service.</td>
+        </tr>
+        <tr>
+          <td class="term">Auto Scaling:</td>
+          <td class="desc">Built-in target tracking via <code>scaling_target</code> — no separate <code>aws_appautoscaling_target</code>.</td>
+        </tr>
+        <tr>
+          <td class="term">Application URL:</td>
+          <td class="desc">Unique HTTPS endpoint on <code>*.ecs.&lt;region&gt;.on.aws</code> for all normal application traffic.</td>
+        </tr>
+        <tr>
+          <td class="term">Classic ECS Alternative:</td>
+          <td class="desc">Requires separate <code>aws_lb</code>, <code>aws_lb_target_group</code>, <code>aws_lb_listener</code>, <code>aws_ecs_service</code>, and <code>aws_appautoscaling_target</code> wired together manually.</td>
+        </tr>
+      </tbody>
+    </table></div>
+  </foreignObject>
+</svg>
