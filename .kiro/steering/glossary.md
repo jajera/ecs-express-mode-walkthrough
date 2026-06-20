@@ -40,7 +40,7 @@ export const glossary: Record<string, string> = {
 ### Example
 
 ```mdx
-import Tooltip from '../../components/Tooltip.astro';
+import Tooltip from "../../components/Tooltip.astro";
 
 ## Concepts
 
@@ -51,6 +51,7 @@ Express Gateway Service handles scaling for you. <!-- no Tooltip here, already w
 ## Auto Scaling
 
 The <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> supports target tracking.
+
 <!-- New h2 section, so wrap first occurrence again -->
 ```
 

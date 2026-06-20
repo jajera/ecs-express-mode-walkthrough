@@ -1,10 +1,10 @@
 ---
-title: 'Infrastructure Role'
-description: 'IAM role granting ECS Express Mode permissions to provision ALB, networking, and auto scaling resources.'
+title: "Infrastructure Role"
+description: "IAM role granting ECS Express Mode permissions to provision ALB, networking, and auto scaling resources."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
 
 ## Overview
 
@@ -13,8 +13,8 @@ The <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip> is assumed
 This role is referenced in the `infrastructure_role_arn` argument of the <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> resource. Without it, ECS cannot create or manage the shared load balancer and related infrastructure.
 
 <Aside type="note">
-  The `infrastructure_role_arn` is an immutable-at-create field. Changing it requires replacing the
-  entire Express Gateway Service.
+  The `infrastructure_role_arn` is an immutable-at-create field. Changing it
+  requires replacing the entire Express Gateway Service.
 </Aside>
 
 ## Terraform Configuration
@@ -92,6 +92,6 @@ The trust policy allows only the `ecs.amazonaws.com` service principal to assume
 The `AmazonECSInfrastructureRoleforExpressGatewayServices` AWS-managed policy grants permissions for ECS to provision and manage the <Tooltip term="Shared_ALB">Shared ALB</Tooltip>, target groups, listeners, auto scaling policies, and networking resources required by Express Mode services.
 
 <Aside type="tip">
-  Using the AWS-managed policy ensures your role stays up to date as Express Mode adds new
-  capabilities without requiring manual policy updates.
+  Using the AWS-managed policy ensures your role stays up to date as Express
+  Mode adds new capabilities without requiring manual policy updates.
 </Aside>

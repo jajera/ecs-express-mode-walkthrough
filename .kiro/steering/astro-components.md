@@ -8,10 +8,12 @@
 
 ```mdx
 <!-- From src/content/docs/*.mdx (top-level pages) -->
-import Tooltip from '../../components/Tooltip.astro';
+
+import Tooltip from "../../components/Tooltip.astro";
 
 <!-- From src/content/docs/section/*.mdx (one level nested) -->
-import Tooltip from '../../../components/Tooltip.astro';
+
+import Tooltip from "../../../components/Tooltip.astro";
 ```
 
 **Props**:
@@ -35,7 +37,7 @@ import Tooltip from '../../../components/Tooltip.astro';
 **Import path**: always the same regardless of page depth
 
 ```mdx
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 ```
 
 **Props**:
@@ -47,20 +49,14 @@ import { Aside } from '@astrojs/starlight/components';
 **Usage**:
 
 ```mdx
-<Aside type="note">
-This is important information the reader should know.
-</Aside>
+<Aside type="note">This is important information the reader should know.</Aside>
 
-<Aside type="tip">
-A helpful suggestion for the reader.
-</Aside>
+<Aside type="tip">A helpful suggestion for the reader.</Aside>
 
-<Aside type="caution">
-Something the reader should be careful about.
-</Aside>
+<Aside type="caution">Something the reader should be careful about.</Aside>
 
 <Aside type="danger">
-A critical warning — incorrect action may cause problems.
+  A critical warning — incorrect action may cause problems.
 </Aside>
 ```
 
@@ -70,10 +66,10 @@ A critical warning — incorrect action may cause problems.
 
 The Tooltip component path is relative. Determine depth from the page location:
 
-| Page location | Tooltip import path |
-|---|---|
-| `src/content/docs/*.mdx` | `../../components/Tooltip.astro` |
-| `src/content/docs/section/*.mdx` | `../../../components/Tooltip.astro` |
+| Page location                        | Tooltip import path                    |
+| ------------------------------------ | -------------------------------------- |
+| `src/content/docs/*.mdx`             | `../../components/Tooltip.astro`       |
+| `src/content/docs/section/*.mdx`     | `../../../components/Tooltip.astro`    |
 | `src/content/docs/section/sub/*.mdx` | `../../../../components/Tooltip.astro` |
 
 Aside always uses the package import (`@astrojs/starlight/components`) — no relative path needed.
@@ -83,15 +79,14 @@ Aside always uses the package import (`@astrojs/starlight/components`) — no re
 Always leave **one blank line** after a component's closing tag before the next content:
 
 ```mdx
-<Aside type="note">
-Content here.
-</Aside>
+<Aside type="note">Content here.</Aside>
 
 Next paragraph starts here.
 ```
 
 ```mdx
-<Tooltip term="VPC">VPC</Tooltip> is inline — no blank line needed after inline components.
+<Tooltip term="VPC">VPC</Tooltip> is inline — no blank line needed after inline
+components.
 ```
 
 The blank-line rule applies to **block-level** component usage (Aside, HTML tables) — not inline Tooltip usage within a paragraph.

@@ -1,21 +1,22 @@
 ---
-title: 'Health Checks in Express Mode'
-description: 'How Express Mode uses ALB target group health checks and why container healthCheck is not supported.'
+title: "Health Checks in Express Mode"
+description: "How Express Mode uses ALB target group health checks and why container healthCheck is not supported."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
-import ec2TargetGroupsHealthy from '../../../assets/screenshots/ecs-express-mode/ec2-target-groups-healthy.png';
-import ecsTasksHealthUnknown from '../../../assets/screenshots/ecs-express-mode/ecs-tasks-health-unknown.png';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
+import ec2TargetGroupsHealthy from "../../../assets/screenshots/ecs-express-mode/ec2-target-groups-healthy.png";
+import ecsTasksHealthUnknown from "../../../assets/screenshots/ecs-express-mode/ecs-tasks-health-unknown.png";
 
 ## ALB Target Group Health Checks
 
-<Tooltip term="Express_Gateway_Service">Express Mode</Tooltip> relies on ALB target group health
-checks to determine whether tasks are healthy and ready to receive traffic. When you define a
-`health_check_path` in your Express Gateway Service resource, the
-<Tooltip term="Shared_ALB">shared ALB</Tooltip> periodically sends HTTP requests to that path on
-each registered target. If the target responds with an HTTP 200 status code, it is considered
-healthy.
+<Tooltip term="Express_Gateway_Service">Express Mode</Tooltip> relies on ALB
+target group health checks to determine whether tasks are healthy and ready to
+receive traffic. When you define a `health_check_path` in your Express Gateway
+Service resource, the
+<Tooltip term="Shared_ALB">shared ALB</Tooltip> periodically sends HTTP requests
+to that path on each registered target. If the target responds with an HTTP 200
+status code, it is considered healthy.
 
 ```hcl title="main.tf"
 resource "aws_ecs_express_gateway_service" "this" {
@@ -47,42 +48,54 @@ This makes `health_check_path` a critical configuration. The path must point to 
     <tr>
       <td>Returns HTTP 200</td>
       <td>
-        The endpoint must respond with a 200 status code when the application is ready to serve
-        traffic
+        The endpoint must respond with a 200 status code when the application is
+        ready to serve traffic
       </td>
     </tr>
     <tr>
       <td>Responds quickly</td>
-      <td>The response must complete within the health check timeout (default 5 seconds)</td>
+      <td>
+        The response must complete within the health check timeout (default 5
+        seconds)
+      </td>
     </tr>
     <tr>
       <td>Validates readiness</td>
-      <td>The check should confirm the application is fully initialized and can handle requests</td>
+      <td>
+        The check should confirm the application is fully initialized and can
+        handle requests
+      </td>
     </tr>
     <tr>
       <td>No authentication</td>
       <td>
-        The health check path must be accessible without auth headers since the ALB sends plain
-        requests
+        The health check path must be accessible without auth headers since the
+        ALB sends plain requests
       </td>
     </tr>
   </tbody>
 </table>
 
-<img src={ec2TargetGroupsHealthy.src} alt="EC2 Target Groups Targets tab showing healthy status" />
+<img
+  src={ec2TargetGroupsHealthy.src}
+  alt="EC2 Target Groups Targets tab showing healthy status"
+/>
 
 ## No Container healthCheck Support
 
 <Aside type="caution">
-  Express Mode does not support the ECS container-level `healthCheck` configuration. The Express
-  Gateway Service API does not accept a `healthCheck` block in the task definition. All health
-  monitoring is performed exclusively through ALB target group health checks via
-  `health_check_path`.
+  Express Mode does not support the ECS container-level `healthCheck`
+  configuration. The Express Gateway Service API does not accept a `healthCheck`
+  block in the task definition. All health monitoring is performed exclusively
+  through ALB target group health checks via `health_check_path`.
 </Aside>
 
 In classic ECS, you can define a `healthCheck` command in the container definition (for example, `curl localhost:8080/health`) that the ECS agent runs inside the container. Express Mode omits this capability entirely. As a result, the ECS Tasks tab in the console displays **Health status: Unknown** for Express Mode tasks — this is expected and does not indicate a problem.
 
-<img src={ecsTasksHealthUnknown.src} alt="ECS Tasks tab showing Health status Unknown" />
+<img
+  src={ecsTasksHealthUnknown.src}
+  alt="ECS Tasks tab showing Health status Unknown"
+/>
 
 Operational health for Express Mode services is determined solely by the ALB target group status. If targets are registered and passing ALB health checks, the service is healthy regardless of what the ECS Tasks tab shows.
 
@@ -107,7 +120,8 @@ Because Express Mode uses only ALB-level health checks, your debugging workflow 
     <tr>
       <td>Tasks unhealthy or failing</td>
       <td>
-        EC2 → Target Groups → Targets tab shows <strong>unhealthy</strong> with a reason code
+        EC2 → Target Groups → Targets tab shows <strong>unhealthy</strong> with
+        a reason code
       </td>
     </tr>
     <tr>
@@ -117,13 +131,14 @@ Because Express Mode uses only ALB-level health checks, your debugging workflow 
     <tr>
       <td>Deployment rolling back</td>
       <td>
-        New tasks failed ALB health checks — inspect target group health reason and CloudWatch Logs
+        New tasks failed ALB health checks — inspect target group health reason
+        and CloudWatch Logs
       </td>
     </tr>
   </tbody>
 </table>
 
 <Aside type="tip">
-  Always check EC2 → Target Groups → Targets for the definitive health status of your Express Mode
-  service. The ECS Tasks tab health column is not applicable.
+  Always check EC2 → Target Groups → Targets for the definitive health status of
+  your Express Mode service. The ECS Tasks tab health column is not applicable.
 </Aside>

@@ -1,11 +1,11 @@
 ---
-title: 'VPC Layout'
-description: 'VPC configuration with DNS support, internet gateway, public subnets, and route table required for ECS Express Mode.'
+title: "VPC Layout"
+description: "VPC configuration with DNS support, internet gateway, public subnets, and route table required for ECS Express Mode."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
-import vpcConsoleSubnetsRouteTable from '../../../assets/screenshots/networking/vpc-console-subnets-route-table.png';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
+import vpcConsoleSubnetsRouteTable from "../../../assets/screenshots/networking/vpc-console-subnets-route-table.png";
 
 ## Overview
 
@@ -80,9 +80,10 @@ resource "aws_route_table_association" "public" {
 ## Single Subnet List Constraint
 
 <Aside type="caution">
-  Express Mode uses a single subnet list for both the ALB and tasks. You cannot place the ALB in
-  public subnets while running tasks in private subnets. If you need the public-ALB + private-tasks
-  pattern, use classic ECS with a separately managed Application Load Balancer instead.
+  Express Mode uses a single subnet list for both the ALB and tasks. You cannot
+  place the ALB in public subnets while running tasks in private subnets. If you
+  need the public-ALB + private-tasks pattern, use classic ECS with a separately
+  managed Application Load Balancer instead.
 </Aside>
 
 The <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> `network_configuration` block accepts one `subnets` list. Express Mode places both the managed ALB and your tasks into those same subnets. This simplifies configuration but limits network isolation options.
@@ -129,7 +130,10 @@ The type of subnets you pass to Express Mode determines the ALB's accessibility 
 
 The demo project uses public subnets so the ALB is internet-facing and the application is accessible from anywhere. If you need an internal-only service, pass private subnets instead — but note there is no hybrid option with Express Mode.
 
-<img src={vpcConsoleSubnetsRouteTable.src} alt="VPC console showing subnets and route table" />
+<img
+  src={vpcConsoleSubnetsRouteTable.src}
+  alt="VPC console showing subnets and route table"
+/>
 
 ## Why This Configuration Is Required
 

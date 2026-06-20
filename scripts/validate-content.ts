@@ -1,25 +1,28 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env tsx
 /**
  * Content validation script for CI pre-build checks.
  *
  * Validates:
- * 1. All Tooltip term props exist as keys in glossary.ts
- * 2. All MDX files have title ≤80 chars and description ≤160 chars (non-empty)
- * 3. All sidebar-referenced pages must not have draft:true
- * 4. All code blocks must have a language identifier
- * 5. Pages importing custom components must not use markdown pipe tables
+ * 1. Prettier formatting
+ * 2. Markdownlint on MDX files
+ * 3. All Tooltip term props exist as keys in glossary.ts
+ * 4. All MDX files have title ≤80 chars and description ≤160 chars (non-empty)
+ * 5. All sidebar-referenced pages must not have draft:true
+ * 6. All code blocks must have a language identifier
+ * 7. Pages importing custom components must not use markdown pipe tables
  *
- * Usage: npx tsx scripts/validate-content.ts
+ * Usage: tsx scripts/validate-content.ts
  * Exit code 0 on success, non-zero on failure.
  */
 
-import { readdirSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { execSync } from "node:child_process";
+import { readdirSync, readFileSync } from "node:fs";
+import { join, relative } from "node:path";
 
 const ROOT = process.cwd();
-const CONTENT_DIR = join(ROOT, 'src/content/docs');
-const GLOSSARY_PATH = join(ROOT, 'src/data/glossary.ts');
-const ASTRO_CONFIG_PATH = join(ROOT, 'astro.config.mjs');
+const CONTENT_DIR = join(ROOT, "src/content/docs");
+const GLOSSARY_PATH = join(ROOT, "src/data/glossary.ts");
+const ASTRO_CONFIG_PATH = join(ROOT, "astro.config.mjs");
 
 // ─── Utility functions ───────────────────────────────────────────────────────
 
@@ -31,7 +34,10 @@ interface MdxFile {
   body: string;
 }
 
-function parseFrontmatter(raw: string): { frontmatter: Record<string, unknown>; body: string } {
+function parseFrontmatter(raw: string): {
+  frontmatter: Record<string, unknown>;
+  body: string;
+} {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) {
     return { frontmatter: {}, body: raw };
@@ -40,22 +46,22 @@ function parseFrontmatter(raw: string): { frontmatter: Record<string, unknown>; 
   const [, yamlBlock, body] = match;
   const frontmatter: Record<string, unknown> = {};
 
-  for (const line of yamlBlock.split('\n')) {
-    const colonIndex = line.indexOf(':');
+  for (const line of yamlBlock.split("\n")) {
+    const colonIndex = line.indexOf(":");
     if (colonIndex === -1) continue;
     const key = line.slice(0, colonIndex).trim();
     let value: unknown = line.slice(colonIndex + 1).trim();
 
     if (
-      typeof value === 'string' &&
+      typeof value === "string" &&
       ((value.startsWith("'") && value.endsWith("'")) ||
         (value.startsWith('"') && value.endsWith('"')))
     ) {
       value = value.slice(1, -1);
     }
 
-    if (value === 'true') value = true;
-    if (value === 'false') value = false;
+    if (value === "true") value = true;
+    if (value === "false") value = false;
 
     frontmatter[key] = value;
   }
@@ -72,8 +78,8 @@ function getAllMdxFiles(): MdxFile[] {
       const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
         walk(fullPath);
-      } else if (entry.name.endsWith('.mdx')) {
-        const raw = readFileSync(fullPath, 'utf-8');
+      } else if (entry.name.endsWith(".mdx")) {
+        const raw = readFileSync(fullPath, "utf-8");
         const { frontmatter, body } = parseFrontmatter(raw);
         files.push({
           path: fullPath,
@@ -91,14 +97,14 @@ function getAllMdxFiles(): MdxFile[] {
 }
 
 function getGlossaryTerms(): string[] {
-  const content = readFileSync(GLOSSARY_PATH, 'utf-8');
+  const content = readFileSync(GLOSSARY_PATH, "utf-8");
   const terms: string[] = [];
   const regex = /^\s*(\w+)\s*:/gm;
   let match: RegExpExecArray | null;
 
   while ((match = regex.exec(content)) !== null) {
     const term = match[1];
-    if (term !== 'export' && term !== 'const' && term !== 'glossary') {
+    if (term !== "export" && term !== "const" && term !== "glossary") {
       terms.push(term);
     }
   }
@@ -106,9 +112,11 @@ function getGlossaryTerms(): string[] {
   return terms;
 }
 
-function extractTooltipTerms(content: string): { term: string; line: number }[] {
+function extractTooltipTerms(
+  content: string,
+): { term: string; line: number }[] {
   const results: { term: string; line: number }[] = [];
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   for (let i = 0; i < lines.length; i++) {
     const regex = /<Tooltip\s+term=["']([^"']+)["']/g;
@@ -121,9 +129,11 @@ function extractTooltipTerms(content: string): { term: string; line: number }[] 
   return results;
 }
 
-function extractCodeBlocks(body: string): { language: string | null; line: number }[] {
+function extractCodeBlocks(
+  body: string,
+): { language: string | null; line: number }[] {
   const blocks: { language: string | null; line: number }[] = [];
-  const lines = body.split('\n');
+  const lines = body.split("\n");
 
   for (let i = 0; i < lines.length; i++) {
     const openMatch = lines[i].match(/^```(\w*)?/);
@@ -142,7 +152,7 @@ function hasCustomComponentImports(body: string): boolean {
   let match: RegExpExecArray | null;
 
   while ((match = importRegex.exec(body)) !== null) {
-    if (!match[1].startsWith('@astrojs/starlight')) {
+    if (!match[1].startsWith("@astrojs/starlight")) {
       return true;
     }
   }
@@ -150,7 +160,7 @@ function hasCustomComponentImports(body: string): boolean {
   // Also check named imports
   const namedImportRegex = /^import\s*\{[^}]+\}\s*from\s*['"]([^'"]+)['"]/gm;
   while ((match = namedImportRegex.exec(body)) !== null) {
-    if (!match[1].startsWith('@astrojs/starlight')) {
+    if (!match[1].startsWith("@astrojs/starlight")) {
       return true;
     }
   }
@@ -160,7 +170,7 @@ function hasCustomComponentImports(body: string): boolean {
 
 function findPipeTables(content: string): { line: number; text: string }[] {
   const tables: { line: number; text: string }[] = [];
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   for (let i = 1; i < lines.length; i++) {
     // A pipe table separator line looks like: | --- | --- | or |---|---|
@@ -176,7 +186,7 @@ function findPipeTables(content: string): { line: number; text: string }[] {
 }
 
 function getSidebarSlugs(): string[] {
-  const content = readFileSync(ASTRO_CONFIG_PATH, 'utf-8');
+  const content = readFileSync(ASTRO_CONFIG_PATH, "utf-8");
   const slugs: string[] = [];
   const regex = /slug:\s*['"]([^'"]+)['"]/g;
   let match: RegExpExecArray | null;
@@ -196,7 +206,10 @@ interface ValidationError {
   message: string;
 }
 
-function validateTooltipTerms(files: MdxFile[], glossaryTerms: string[]): ValidationError[] {
+function validateTooltipTerms(
+  files: MdxFile[],
+  glossaryTerms: string[],
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
   for (const file of files) {
@@ -221,7 +234,7 @@ function validateFrontmatter(files: MdxFile[]): ValidationError[] {
   for (const file of files) {
     const { title, description } = file.frontmatter;
 
-    if (!title || typeof title !== 'string' || title.length === 0) {
+    if (!title || typeof title !== "string" || title.length === 0) {
       errors.push({
         file: file.relativePath,
         message: 'Frontmatter "title" is missing or empty',
@@ -233,7 +246,11 @@ function validateFrontmatter(files: MdxFile[]): ValidationError[] {
       });
     }
 
-    if (!description || typeof description !== 'string' || description.length === 0) {
+    if (
+      !description ||
+      typeof description !== "string" ||
+      description.length === 0
+    ) {
       errors.push({
         file: file.relativePath,
         message: 'Frontmatter "description" is missing or empty',
@@ -255,7 +272,7 @@ function validateSidebarNotDraft(files: MdxFile[]): ValidationError[] {
 
   for (const slug of sidebarSlugs) {
     // Convert slug to file path: "index" -> "index.mdx", "ecs-express-mode/concepts" -> "ecs-express-mode/concepts.mdx"
-    const filePath = slug + '.mdx';
+    const filePath = slug + ".mdx";
     const file = files.find((f) => f.relativePath === filePath);
 
     if (file && file.frontmatter.draft === true) {
@@ -288,7 +305,9 @@ function validateCodeBlockLanguages(files: MdxFile[]): ValidationError[] {
   return errors;
 }
 
-function validateNoPipeTablesWithComponents(files: MdxFile[]): ValidationError[] {
+function validateNoPipeTablesWithComponents(
+  files: MdxFile[],
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
   for (const file of files) {
@@ -307,10 +326,54 @@ function validateNoPipeTablesWithComponents(files: MdxFile[]): ValidationError[]
   return errors;
 }
 
+// ─── External checks ─────────────────────────────────────────────────────────
+
+const externalChecks = [
+  {
+    label: "prettier",
+    command: "npx prettier --check .",
+  },
+  {
+    label: "markdownlint",
+    command: 'npx markdownlint-cli2 "src/**/*.mdx"',
+  },
+] as const;
+
+function runExternalChecks(): string[] {
+  const failures: string[] = [];
+
+  for (const check of externalChecks) {
+    try {
+      execSync(check.command, { stdio: "pipe", encoding: "utf-8" });
+      console.log(`[${check.label}] passed`);
+    } catch (error) {
+      const err = error as {
+        stdout?: string;
+        stderr?: string;
+        message?: string;
+      };
+      failures.push(`[${check.label}] failed`);
+      if (err.stdout) console.error(err.stdout);
+      if (err.stderr) console.error(err.stderr);
+      if (!err.stdout && !err.stderr) console.error(err.message);
+    }
+  }
+
+  return failures;
+}
+
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 function main(): void {
-  console.log('Validating content...\n');
+  console.log("Validating content...\n");
+
+  const externalFailures = runExternalChecks();
+  if (externalFailures.length > 0) {
+    console.error(`Validation failed: ${externalFailures.join(", ")}`);
+    process.exit(1);
+  }
+
+  console.log("");
 
   const files = getAllMdxFiles();
   const glossaryTerms = getGlossaryTerms();
@@ -318,29 +381,29 @@ function main(): void {
   const allErrors: ValidationError[] = [];
 
   // Check 1: Tooltip terms exist in glossary
-  console.log('  ✓ Checking Tooltip terms exist in glossary...');
+  console.log("  ✓ Checking Tooltip terms exist in glossary...");
   allErrors.push(...validateTooltipTerms(files, glossaryTerms));
 
   // Check 2: Frontmatter length constraints
-  console.log('  ✓ Checking frontmatter title/description constraints...');
+  console.log("  ✓ Checking frontmatter title/description constraints...");
   allErrors.push(...validateFrontmatter(files));
 
   // Check 3: Sidebar pages not draft
-  console.log('  ✓ Checking sidebar-referenced pages are not draft...');
+  console.log("  ✓ Checking sidebar-referenced pages are not draft...");
   allErrors.push(...validateSidebarNotDraft(files));
 
   // Check 4: Code blocks have language identifiers
-  console.log('  ✓ Checking code blocks have language identifiers...');
+  console.log("  ✓ Checking code blocks have language identifiers...");
   allErrors.push(...validateCodeBlockLanguages(files));
 
   // Check 5: Pages with component imports don't use pipe tables
-  console.log('  ✓ Checking pages with component imports use HTML tables...');
+  console.log("  ✓ Checking pages with component imports use HTML tables...");
   allErrors.push(...validateNoPipeTablesWithComponents(files));
 
-  console.log('');
+  console.log("");
 
   if (allErrors.length === 0) {
-    console.log('✅ All content validation checks passed!\n');
+    console.log("All validation checks passed\n");
     process.exit(0);
   } else {
     console.log(`❌ Found ${allErrors.length} validation error(s):\n`);
@@ -348,7 +411,7 @@ function main(): void {
       const location = error.line ? `${error.file}:${error.line}` : error.file;
       console.log(`  ${location}: ${error.message}`);
     }
-    console.log('');
+    console.log("");
     process.exit(1);
   }
 }

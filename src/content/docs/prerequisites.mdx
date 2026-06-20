@@ -3,8 +3,8 @@ title: Prerequisites
 description: Required tools, AWS permissions, and Bedrock model access needed to deploy the ECS Express Mode demo.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../components/Tooltip.astro";
 
 ## Required Tools
 
@@ -52,8 +52,11 @@ Your AWS credentials must have permissions to create and manage:
     <tr>
       <td>Amazon ECS</td>
       <td>
-        Cluster, <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip>, task
-        definitions
+        Cluster,{" "}
+        <Tooltip term="Express_Gateway_Service">
+          Express Gateway Service
+        </Tooltip>
+        , task definitions
       </td>
     </tr>
     <tr>
@@ -61,30 +64,32 @@ Your AWS credentials must have permissions to create and manage:
         <Tooltip term="VPC">VPC</Tooltip>
       </td>
       <td>
-        VPC, subnets, <Tooltip term="Internet_Gateway">internet gateway</Tooltip>, route tables,{' '}
-        <Tooltip term="Security_Group">security groups</Tooltip>
+        VPC, subnets,{" "}
+        <Tooltip term="Internet_Gateway">internet gateway</Tooltip>, route
+        tables, <Tooltip term="Security_Group">security groups</Tooltip>
       </td>
     </tr>
     <tr>
       <td>IAM</td>
       <td>
-        <Tooltip term="Task_Execution_Role">Task Execution Role</Tooltip>,{' '}
-        <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip>,{' '}
+        <Tooltip term="Task_Execution_Role">Task Execution Role</Tooltip>,{" "}
+        <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip>,{" "}
         <Tooltip term="Task_Role">Task Role</Tooltip>
       </td>
     </tr>
     <tr>
       <td>Elastic Load Balancing</td>
       <td>
-        <Tooltip term="Shared_ALB">Application Load Balancer</Tooltip> (managed by Express Mode)
+        <Tooltip term="Shared_ALB">Application Load Balancer</Tooltip> (managed
+        by Express Mode)
       </td>
     </tr>
   </tbody>
 </table>
 
 <Aside type="tip">
-  An AdministratorAccess policy works for testing. For production, scope permissions to ECS, EC2,
-  IAM, and CloudWatch.
+  An AdministratorAccess policy works for testing. For production, scope
+  permissions to ECS, EC2, IAM, and CloudWatch.
 </Aside>
 
 ## Bedrock Model Access
@@ -99,8 +104,8 @@ The demo uses Amazon <Tooltip term="Bedrock">Bedrock</Tooltip> for image analysi
 4. Wait for status to show **Access granted**
 
 <Aside type="caution">
-  Model access is typically approved within minutes but can take up to 24 hours. Complete this
-  before running terraform apply.
+  Model access is typically approved within minutes but can take up to 24 hours.
+  Complete this before running terraform apply.
 </Aside>
 
 ### Regional Availability

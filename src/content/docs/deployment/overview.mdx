@@ -1,19 +1,20 @@
 ---
-title: 'Deployment Overview'
-description: 'High-level deployment flow for ECS Express Mode: terraform init, apply, what gets provisioned, and how to verify.'
+title: "Deployment Overview"
+description: "High-level deployment flow for ECS Express Mode: terraform init, apply, what gets provisioned, and how to verify."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
 
 ## Deployment Flow
 
 Deploying the ECS Express Mode demo is a two-command workflow: `terraform init` to initialize the working directory and download providers, then `terraform apply` to provision the entire stack. The <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> resource handles most of the infrastructure wiring automatically.
 
 <Aside type="note">
-  All resources are created in a single apply. There is no multi-step deployment or manual ALB
-  configuration required — Express Mode provisions the load balancer, target group, listener, and
-  auto scaling as part of the service creation.
+  All resources are created in a single apply. There is no multi-step deployment
+  or manual ALB configuration required — Express Mode provisions the load
+  balancer, target group, listener, and auto scaling as part of the service
+  creation.
 </Aside>
 
 ## What Gets Provisioned
@@ -44,7 +45,9 @@ When `terraform apply` completes, Express Mode creates and configures the follow
     <tr>
       <td>Auto Scaling</td>
       <td>Express Mode</td>
-      <td>Scales tasks between min and max count based on the configured metric</td>
+      <td>
+        Scales tasks between min and max count based on the configured metric
+      </td>
     </tr>
     <tr>
       <td>
@@ -52,7 +55,8 @@ When `terraform apply` completes, Express Mode creates and configures the follow
       </td>
       <td>Express Mode</td>
       <td>
-        Unique HTTPS endpoint on <code>*.ecs.&lt;region&gt;.on.aws</code> for application access
+        Unique HTTPS endpoint on <code>*.ecs.&lt;region&gt;.on.aws</code> for
+        application access
       </td>
     </tr>
     <tr>
@@ -60,19 +64,27 @@ When `terraform apply` completes, Express Mode creates and configures the follow
         <Tooltip term="RollbackAlarm">Rollback Alarm</Tooltip>
       </td>
       <td>Express Mode</td>
-      <td>CloudWatch alarm that triggers automatic rollback on failed deployments</td>
+      <td>
+        CloudWatch alarm that triggers automatic rollback on failed deployments
+      </td>
     </tr>
     <tr>
       <td>
         <Tooltip term="VPC">VPC</Tooltip> and Subnets
       </td>
       <td>Your Terraform code</td>
-      <td>Network foundation with public subnets, internet gateway, and route table</td>
+      <td>
+        Network foundation with public subnets, internet gateway, and route
+        table
+      </td>
     </tr>
     <tr>
       <td>IAM Roles</td>
       <td>Your Terraform code</td>
-      <td>Task execution, infrastructure, and task roles with least-privilege policies</td>
+      <td>
+        Task execution, infrastructure, and task roles with least-privilege
+        policies
+      </td>
     </tr>
     <tr>
       <td>ECS Cluster</td>
@@ -91,9 +103,9 @@ After `terraform apply` succeeds, verify the deployment is healthy by checking t
 3. **Health endpoint** — curl the health check path and confirm an HTTP 200 response
 
 <Aside type="tip">
-  Use the Application URL (<code>*.ecs.&lt;region&gt;.on.aws</code>) for all application access
-  rather than the raw ALB DNS name. The Application URL is the Express-provisioned endpoint with
-  Host header routing configured.
+  Use the Application URL (<code>*.ecs.&lt;region&gt;.on.aws</code>) for all
+  application access rather than the raw ALB DNS name. The Application URL is
+  the Express-provisioned endpoint with Host header routing configured.
 </Aside>
 
 ## Next Steps

@@ -3,8 +3,8 @@ title: Express Gateway Service
 description: Complete HCL reference for aws_ecs_express_gateway_service with block-by-block explanations.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
 
 ## Overview
 
@@ -70,7 +70,8 @@ primary_container {
         <code>container_name</code>
       </td>
       <td>
-        Must match the <code>name</code> field in the task definition's container definitions
+        Must match the <code>name</code> field in the task definition's
+        container definitions
       </td>
     </tr>
     <tr>
@@ -89,8 +90,9 @@ primary_container {
 </table>
 
 <Aside type="caution">
-  A mismatch between <code>container_port</code> and the application's actual listen port is the
-  most common cause of health check failures and rollback loops.
+  A mismatch between <code>container_port</code> and the application's actual
+  listen port is the most common cause of health check failures and rollback
+  loops.
 </Aside>
 
 ## Network Configuration
@@ -124,7 +126,8 @@ network_configuration {
         <code>security_groups</code>
       </td>
       <td>
-        Must allow ingress on <code>container_port</code> from the <Tooltip term="VPC">VPC</Tooltip>{' '}
+        Must allow ingress on <code>container_port</code> from the{" "}
+        <Tooltip term="VPC">VPC</Tooltip>{" "}
         <Tooltip term="CIDR_Block">CIDR</Tooltip>
       </td>
     </tr>
@@ -133,7 +136,8 @@ network_configuration {
         <code>access_type</code>
       </td>
       <td>
-        <code>PUBLIC</code> = internet-facing ALB; <code>PRIVATE</code> = internal ALB
+        <code>PUBLIC</code> = internet-facing ALB; <code>PRIVATE</code> =
+        internal ALB
       </td>
     </tr>
   </tbody>
@@ -190,8 +194,8 @@ scaling_target {
 </table>
 
 <Aside type="tip">
-  The scaling target is built into the resource — no separate <code>aws_appautoscaling_target</code>{' '}
-  or policy resources needed.
+  The scaling target is built into the resource — no separate{" "}
+  <code>aws_appautoscaling_target</code> or policy resources needed.
 </Aside>
 
 ## Top-Level Parameters
@@ -227,15 +231,17 @@ scaling_target {
         <code>infrastructure_role_arn</code>
       </td>
       <td>
-        <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip> granting ECS permission to
-        provision ALB and scaling
+        <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip>{" "}
+        granting ECS permission to provision ALB and scaling
       </td>
     </tr>
     <tr>
       <td>
         <code>desired_count</code>
       </td>
-      <td>Initial task count — auto scaling adjusts this between min and max</td>
+      <td>
+        Initial task count — auto scaling adjusts this between min and max
+      </td>
     </tr>
   </tbody>
 </table>

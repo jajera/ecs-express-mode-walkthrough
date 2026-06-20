@@ -91,7 +91,7 @@ The Astro Starlight project scaffolding (site config, theme, components, GitHub 
 1. THE IAM overview page SHALL explain the three-role model: Task_Execution_Role, Infrastructure_Role, and Task_Role, with a table listing each role name, trusted principal, and purpose
 2. THE Task Execution Role page SHALL show HCL for the role with AmazonECSTaskExecutionRolePolicy attachment and ecs-tasks.amazonaws.com trust with aws:SourceAccount condition, referencing the Source_Repo filename
 3. THE Infrastructure Role page SHALL show HCL for the role with AmazonECSInfrastructureRoleforExpressGatewayServices attachment and ecs.amazonaws.com trust with aws:SourceAccount condition, referencing the Source_Repo filename
-4. THE Task Role page SHALL show the Bedrock IAM policy supporting both foundation model ARNs (arn:aws:bedrock:*::foundation-model/*) and inference profile ARNs (arn:aws:bedrock:*:*:inference-profile/*) with an explanation of why both are required
+4. THE Task Role page SHALL show the Bedrock IAM policy supporting both foundation model ARNs (arn:aws:bedrock:_::foundation-model/_) and inference profile ARNs (arn:aws:bedrock:_:_:inference-profile/\*) with an explanation of why both are required
 5. ALL IAM documentation SHALL reference actual Terraform from the Source_Repo with code block title attributes set to the source filename
 
 ### Requirement 6: Networking Content

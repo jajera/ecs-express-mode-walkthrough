@@ -1,11 +1,11 @@
 ---
-title: 'Ingress Configuration'
-description: 'How Express Mode provisions a public ALB endpoint and exposes ingress_paths output with ALB DNS, listener, and target group.'
+title: "Ingress Configuration"
+description: "How Express Mode provisions a public ALB endpoint and exposes ingress_paths output with ALB DNS, listener, and target group."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
-import ec2LoadBalancersExpressManagedAlb from '../../../assets/screenshots/networking/ec2-load-balancers-express-managed-alb.png';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
+import ec2LoadBalancersExpressManagedAlb from "../../../assets/screenshots/networking/ec2-load-balancers-express-managed-alb.png";
 
 ## Overview
 
@@ -23,9 +23,10 @@ Express Mode handles the full ingress stack automatically when you create an <To
 4. Each service receives a unique <Tooltip term="Application_URL">Application URL</Tooltip> on `*.ecs.<region>.on.aws`
 
 <Aside type="note">
-  The ALB is shared across up to 25 Express services in the same VPC. Express Mode uses Host header
-  routing rules to direct traffic to the correct target group for each service. You do not manage
-  listener rules or target group registrations — ECS handles this entirely.
+  The ALB is shared across up to 25 Express services in the same VPC. Express
+  Mode uses Host header routing rules to direct traffic to the correct target
+  group for each service. You do not manage listener rules or target group
+  registrations — ECS handles this entirely.
 </Aside>
 
 The network configuration in your Express Gateway Service resource determines where the ALB is placed:
@@ -68,9 +69,10 @@ output "target_group_arn" {
 ```
 
 <Aside type="tip">
-  The <code>ingress_paths</code> attribute is a list. For a single-service deployment, access index
-  <code>[0]</code> to retrieve the primary ingress path. Each entry contains the ALB DNS name,
-  listener ARN, and target group ARN for that path.
+  The <code>ingress_paths</code> attribute is a list. For a single-service
+  deployment, access index
+  <code>[0]</code> to retrieve the primary ingress path. Each entry contains the
+  ALB DNS name, listener ARN, and target group ARN for that path.
 </Aside>
 
 ## ingress_paths Structure
@@ -93,7 +95,8 @@ The `ingress_paths` output is a list of objects. Each object contains three key 
       </td>
       <td>string</td>
       <td>
-        Public DNS name of the Express-managed <Tooltip term="Shared_ALB">Shared ALB</Tooltip>
+        Public DNS name of the Express-managed{" "}
+        <Tooltip term="Shared_ALB">Shared ALB</Tooltip>
       </td>
       <td>
         <code>express-abcdef12.us-east-1.elb.amazonaws.com</code>
@@ -118,17 +121,21 @@ The `ingress_paths` output is a list of objects. Each object contains three key 
       <td>string</td>
       <td>ARN of the target group registered for this service's tasks</td>
       <td>
-        <code>arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/express-.../...</code>
+        <code>
+          arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/express-.../...
+        </code>
       </td>
     </tr>
   </tbody>
 </table>
 
 <Aside type="caution">
-  The raw ALB DNS name is not the URL you should use for application traffic. Express Mode assigns
-  each service a unique <Tooltip term="Application_URL">Application URL</Tooltip> on
-  <code>*.ecs.&lt;region&gt;.on.aws</code>. Use that URL for accessing your application. The ALB DNS
-  name is useful for diagnostics and verifying the underlying infrastructure.
+  The raw ALB DNS name is not the URL you should use for application traffic.
+  Express Mode assigns each service a unique{" "}
+  <Tooltip term="Application_URL">Application URL</Tooltip> on
+  <code>*.ecs.&lt;region&gt;.on.aws</code>. Use that URL for accessing your
+  application. The ALB DNS name is useful for diagnostics and verifying the
+  underlying infrastructure.
 </Aside>
 
 ## ALB DNS Name vs Application URL
@@ -176,9 +183,14 @@ Understanding the ingress layer helps you adapt Express Mode to your environment
 - **Network validation** — confirming the ALB DNS name resolves and returns HTTP responses verifies that your <Tooltip term="VPC">VPC</Tooltip>, subnets, and security groups are correctly configured for Express Mode
 
 <Aside type="note">
-  You do not define ALB, listener, or target group resources in your Terraform code when using
-  Express Mode. ECS provisions and manages them through the Infrastructure Role. The
-  <code>ingress_paths</code> output gives you read-only access to their identifiers.
+  You do not define ALB, listener, or target group resources in your Terraform
+  code when using Express Mode. ECS provisions and manages them through the
+  Infrastructure Role. The
+  <code>ingress_paths</code> output gives you read-only access to their
+  identifiers.
 </Aside>
 
-<img src={ec2LoadBalancersExpressManagedAlb.src} alt="EC2 Load Balancers showing Express-managed ALB" />
+<img
+  src={ec2LoadBalancersExpressManagedAlb.src}
+  alt="EC2 Load Balancers showing Express-managed ALB"
+/>

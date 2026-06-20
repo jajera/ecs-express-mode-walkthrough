@@ -1,19 +1,19 @@
 ---
-title: 'Task Execution Role'
-description: 'IAM role for ECS task execution with image pull and log permissions using ecs-tasks.amazonaws.com trust.'
+title: "Task Execution Role"
+description: "IAM role for ECS task execution with image pull and log permissions using ecs-tasks.amazonaws.com trust."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
 
 ## Overview
 
 The <Tooltip term="Task_Execution_Role">Task Execution Role</Tooltip> is assumed by the ECS agent on your behalf to pull container images from ECR and write logs to CloudWatch. This role is referenced in the task definition's `executionRoleArn` field and is required for any ECS task that uses private container images or CloudWatch logging.
 
 <Aside type="note">
-  This role is distinct from the Task Role, which grants permissions to the running container
-  application. The Task Execution Role only handles infrastructure-level operations performed by the
-  ECS agent.
+  This role is distinct from the Task Role, which grants permissions to the
+  running container application. The Task Execution Role only handles
+  infrastructure-level operations performed by the ECS agent.
 </Aside>
 
 ## Terraform Configuration
@@ -95,8 +95,9 @@ The `AmazonECSTaskExecutionRolePolicy` AWS managed policy grants permissions to:
 </table>
 
 <Aside type="tip">
-  Using the AWS managed policy is the recommended approach. Avoid creating custom policies that
-  duplicate these permissions unless you need additional restrictions.
+  Using the AWS managed policy is the recommended approach. Avoid creating
+  custom policies that duplicate these permissions unless you need additional
+  restrictions.
 </Aside>
 
 ## Trust Policy Details
@@ -104,9 +105,9 @@ The `AmazonECSTaskExecutionRolePolicy` AWS managed policy grants permissions to:
 The trust relationship specifies `ecs-tasks.amazonaws.com` as the trusted principal. The `aws:SourceAccount` condition ensures only ECS tasks running in your own AWS account can assume this role, preventing confused deputy scenarios in multi-account environments.
 
 <Aside type="caution">
-  Without the <code>aws:SourceAccount</code> condition, any ECS task in any account could
-  potentially assume this role if they knew the role ARN. Always include this condition for defense
-  in depth.
+  Without the <code>aws:SourceAccount</code> condition, any ECS task in any
+  account could potentially assume this role if they knew the role ARN. Always
+  include this condition for defense in depth.
 </Aside>
 
 ## Usage in Express Gateway Service

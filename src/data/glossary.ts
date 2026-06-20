@@ -1,17 +1,31 @@
 export const glossary: Record<string, string> = {
-  Express_Gateway_Service: "The aws_ecs_express_gateway_service Terraform resource that provisions an ECS service with managed ALB, auto scaling, and simplified configuration for HTTP/HTTPS web applications and APIs.",
-  Infrastructure_Role: "An IAM role assumed by ecs.amazonaws.com that grants ECS Express Mode permissions to provision ALB, networking, and auto scaling resources.",
-  Task_Execution_Role: "An IAM role assumed by ecs-tasks.amazonaws.com that grants ECS permissions to pull container images and write CloudWatch logs.",
-  Task_Role: "An IAM role assumed by ecs-tasks.amazonaws.com that grants the running container application-level permissions (Bedrock access in this project).",
-  Application_URL: "The unique Express-provisioned HTTPS URL on *.ecs.<region>.on.aws used for all normal application traffic.",
-  RollbackAlarm: "A CloudWatch metric alarm created by Express Mode that triggers automatic deployment rollback when new tasks fail ALB health checks.",
-  Shared_ALB: "The Application Load Balancer shared by up to 25 Express services in the same VPC using Host header routing rules.",
-  Bedrock: "AWS fully managed service providing foundation models for generative AI applications.",
-  Foundation_Model: "A pre-trained large language or multimodal model available through Amazon Bedrock.",
-  Inference_Profile: "A Bedrock configuration that specifies model parameters and routing for inference requests.",
+  Express_Gateway_Service:
+    "The aws_ecs_express_gateway_service Terraform resource that provisions an ECS service with managed ALB, auto scaling, and simplified configuration for HTTP/HTTPS web applications and APIs.",
+  Infrastructure_Role:
+    "An IAM role assumed by ecs.amazonaws.com that grants ECS Express Mode permissions to provision ALB, networking, and auto scaling resources.",
+  Task_Execution_Role:
+    "An IAM role assumed by ecs-tasks.amazonaws.com that grants ECS permissions to pull container images and write CloudWatch logs.",
+  Task_Role:
+    "An IAM role assumed by ecs-tasks.amazonaws.com that grants the running container application-level permissions (Bedrock access in this project).",
+  Application_URL:
+    "The unique Express-provisioned HTTPS URL on *.ecs.<region>.on.aws used for all normal application traffic.",
+  RollbackAlarm:
+    "A CloudWatch metric alarm created by Express Mode that triggers automatic deployment rollback when new tasks fail ALB health checks.",
+  Shared_ALB:
+    "The Application Load Balancer shared by up to 25 Express services in the same VPC using Host header routing rules.",
+  Bedrock:
+    "AWS fully managed service providing foundation models for generative AI applications.",
+  Foundation_Model:
+    "A pre-trained large language or multimodal model available through Amazon Bedrock.",
+  Inference_Profile:
+    "A Bedrock configuration that specifies model parameters and routing for inference requests.",
   VPC: "Virtual Private Cloud — an isolated virtual network within AWS where resources are deployed.",
-  Internet_Gateway: "A VPC component that enables communication between resources in a VPC and the internet.",
-  Public_Subnet: "A subnet with a route to an Internet Gateway, enabling resources to have public IP addresses and internet access.",
-  Security_Group: "A virtual firewall for EC2 instances and other resources that controls inbound and outbound traffic.",
-  CIDR_Block: "Classless Inter-Domain Routing notation specifying an IP address range for a VPC or subnet.",
+  Internet_Gateway:
+    "A VPC component that enables communication between resources in a VPC and the internet.",
+  Public_Subnet:
+    "A subnet with a route to an Internet Gateway, enabling resources to have public IP addresses and internet access.",
+  Security_Group:
+    "A virtual firewall for EC2 instances and other resources that controls inbound and outbound traffic.",
+  CIDR_Block:
+    "Classless Inter-Domain Routing notation specifying an IP address range for a VPC or subnet.",
 };

@@ -1,10 +1,10 @@
 ---
-title: 'IAM Roles Overview'
-description: 'Understand the three-role model used by ECS Express Mode: Task Execution Role, Infrastructure Role, and Task Role.'
+title: "IAM Roles Overview"
+description: "Understand the three-role model used by ECS Express Mode: Task Execution Role, Infrastructure Role, and Task Role."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
 
 ## Three-Role Model
 
@@ -13,8 +13,8 @@ ECS Express Mode requires three distinct IAM roles, each with a specific trust r
 The <Tooltip term="Task_Execution_Role">Task Execution Role</Tooltip> handles container lifecycle operations, the <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip> grants ECS permission to provision and manage load balancing and scaling resources, and the <Tooltip term="Task_Role">Task Role</Tooltip> provides application-level permissions to the running container.
 
 <Aside type="note">
-  All three roles use `aws:SourceAccount` conditions in their trust policies to prevent
-  cross-account confused deputy attacks.
+  All three roles use `aws:SourceAccount` conditions in their trust policies to
+  prevent cross-account confused deputy attacks.
 </Aside>
 
 <table>
@@ -42,7 +42,10 @@ The <Tooltip term="Task_Execution_Role">Task Execution Role</Tooltip> handles co
       <td>
         <code>ecs.amazonaws.com</code>
       </td>
-      <td>Provisions and manages ALB, networking, and auto scaling resources for Express Mode</td>
+      <td>
+        Provisions and manages ALB, networking, and auto scaling resources for
+        Express Mode
+      </td>
     </tr>
     <tr>
       <td>
@@ -52,7 +55,8 @@ The <Tooltip term="Task_Execution_Role">Task Execution Role</Tooltip> handles co
         <code>ecs-tasks.amazonaws.com</code>
       </td>
       <td>
-        Grants the running container application-level permissions (Bedrock access in this project)
+        Grants the running container application-level permissions (Bedrock
+        access in this project)
       </td>
     </tr>
   </tbody>
@@ -66,8 +70,9 @@ Each role has an assume-role policy that restricts which AWS service principal c
 - **ecs.amazonaws.com** — assumed by the ECS control plane for the <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip> (provisioning Express Mode resources)
 
 <Aside type="tip">
-  The Infrastructure Role is unique to Express Mode. Classic ECS services do not require it because
-  you provision ALB and scaling resources directly in your Terraform code.
+  The Infrastructure Role is unique to Express Mode. Classic ECS services do not
+  require it because you provision ALB and scaling resources directly in your
+  Terraform code.
 </Aside>
 
 ## Next Steps

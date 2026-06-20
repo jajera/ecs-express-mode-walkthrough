@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import * as fc from 'fast-check';
-import { getAllMdxFiles } from './test-utils';
+import { describe, it, expect } from "vitest";
+import * as fc from "fast-check";
+import { getAllMdxFiles } from "./test-utils";
 
 /**
  * Property 3: Frontmatter validity
@@ -8,15 +8,15 @@ import { getAllMdxFiles } from './test-utils';
  *
  * **Validates: Requirements 3.6**
  */
-describe('Feature: ecs-express-mode-walkthrough, Property 3: Frontmatter validity', () => {
+describe("Feature: ecs-express-mode-walkthrough, Property 3: Frontmatter validity", () => {
   const mdxFiles = getAllMdxFiles();
 
-  it('every MDX file has a non-empty title with length ≤80 characters', () => {
+  it("every MDX file has a non-empty title with length ≤80 characters", () => {
     fc.assert(
       fc.property(fc.constantFrom(...mdxFiles), (file) => {
         const title = file.frontmatter.title;
         expect(
-          typeof title === 'string' && title.length > 0,
+          typeof title === "string" && title.length > 0,
           `File "${file.relativePath}" has missing or empty title`,
         ).toBe(true);
         expect(
@@ -28,12 +28,12 @@ describe('Feature: ecs-express-mode-walkthrough, Property 3: Frontmatter validit
     );
   });
 
-  it('every MDX file has a non-empty description with length ≤160 characters', () => {
+  it("every MDX file has a non-empty description with length ≤160 characters", () => {
     fc.assert(
       fc.property(fc.constantFrom(...mdxFiles), (file) => {
         const description = file.frontmatter.description;
         expect(
-          typeof description === 'string' && description.length > 0,
+          typeof description === "string" && description.length > 0,
           `File "${file.relativePath}" has missing or empty description`,
         ).toBe(true);
         expect(

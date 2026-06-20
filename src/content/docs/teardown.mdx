@@ -1,10 +1,10 @@
 ---
-title: 'Teardown'
-description: 'Destroy the ECS Express Mode demo infrastructure with terraform destroy and verify all resources are removed.'
+title: "Teardown"
+description: "Destroy the ECS Express Mode demo infrastructure with terraform destroy and verify all resources are removed."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../components/Tooltip.astro";
 
 ## Destroy the Infrastructure
 
@@ -17,8 +17,8 @@ terraform destroy
 Terraform prompts for confirmation before proceeding. Type `yes` to confirm. The destroy operation removes resources in reverse dependency order — the Express Gateway Service and its managed ALB are removed first, followed by IAM roles, security groups, subnets, and the <Tooltip term="VPC">VPC</Tooltip>.
 
 <Aside type="note">
-  The destroy operation typically takes 3–5 minutes. The longest wait is for the ALB and target
-  group to drain connections before deletion.
+  The destroy operation typically takes 3–5 minutes. The longest wait is for the
+  ALB and target group to drain connections before deletion.
 </Aside>
 
 ## Verify Resource Removal
@@ -32,8 +32,8 @@ terraform state list
 The command should produce no output. If any resources are listed, run `terraform destroy` again to remove them.
 
 <Aside type="tip">
-  You can also confirm in the ECS and EC2 consoles that the cluster, Express service, and load
-  balancer are gone.
+  You can also confirm in the ECS and EC2 consoles that the cluster, Express
+  service, and load balancer are gone.
 </Aside>
 
 ## Troubleshooting Destroy Failures

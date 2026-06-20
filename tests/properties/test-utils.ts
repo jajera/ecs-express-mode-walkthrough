@@ -1,7 +1,7 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { readdirSync, readFileSync } from "node:fs";
+import { join, relative } from "node:path";
 
-const CONTENT_DIR = join(process.cwd(), 'src/content/docs');
+const CONTENT_DIR = join(process.cwd(), "src/content/docs");
 
 /**
  * Represents a parsed MDX file with frontmatter and content.
@@ -57,8 +57,8 @@ export function getAllMdxFiles(): MdxFile[] {
       const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
         walk(fullPath);
-      } else if (entry.name.endsWith('.mdx')) {
-        const raw = readFileSync(fullPath, 'utf-8');
+      } else if (entry.name.endsWith(".mdx")) {
+        const raw = readFileSync(fullPath, "utf-8");
         const { frontmatter, body } = parseFrontmatter(raw);
         files.push({
           path: fullPath,
@@ -91,15 +91,15 @@ export function parseFrontmatter(raw: string): {
   const [, yamlBlock, body] = match;
   const frontmatter: Record<string, unknown> = {};
 
-  for (const line of yamlBlock.split('\n')) {
-    const colonIndex = line.indexOf(':');
+  for (const line of yamlBlock.split("\n")) {
+    const colonIndex = line.indexOf(":");
     if (colonIndex === -1) continue;
     const key = line.slice(0, colonIndex).trim();
     let value: unknown = line.slice(colonIndex + 1).trim();
 
     // Strip surrounding quotes
     if (
-      typeof value === 'string' &&
+      typeof value === "string" &&
       ((value.startsWith("'") && value.endsWith("'")) ||
         (value.startsWith('"') && value.endsWith('"')))
     ) {
@@ -107,8 +107,8 @@ export function parseFrontmatter(raw: string): {
     }
 
     // Parse booleans
-    if (value === 'true') value = true;
-    if (value === 'false') value = false;
+    if (value === "true") value = true;
+    if (value === "false") value = false;
 
     frontmatter[key] = value;
   }
@@ -122,14 +122,14 @@ export function parseFrontmatter(raw: string): {
  */
 export function extractCodeBlocks(body: string): CodeBlock[] {
   const blocks: CodeBlock[] = [];
-  const lines = body.split('\n');
+  const lines = body.split("\n");
   let i = 0;
 
   while (i < lines.length) {
     const openMatch = lines[i].match(/^```(\w*)?(?:\s+(.*))?$/);
     if (openMatch) {
       const language = openMatch[1] || null;
-      const attrs = openMatch[2] || '';
+      const attrs = openMatch[2] || "";
       const title = extractTitleAttr(attrs);
       const lineNumber = i + 1;
       const contentLines: string[] = [];
@@ -143,7 +143,7 @@ export function extractCodeBlocks(body: string): CodeBlock[] {
       blocks.push({
         language,
         title,
-        content: contentLines.join('\n'),
+        content: contentLines.join("\n"),
         line: lineNumber,
       });
     }
@@ -195,7 +195,7 @@ export function detectImports(body: string): string[] {
  */
 export function hasCustomComponentImports(body: string): boolean {
   const imports = detectImports(body);
-  return imports.some((src) => !src.startsWith('@astrojs/starlight'));
+  return imports.some((src) => !src.startsWith("@astrojs/starlight"));
 }
 
 /**
@@ -219,9 +219,11 @@ export function extractTooltipTerms(content: string): string[] {
  * A pipe table is detected by lines matching the pattern: | ... | ... |
  * with a separator line containing dashes (| --- | --- |).
  */
-export function findPipeTables(content: string): { line: number; text: string }[] {
+export function findPipeTables(
+  content: string,
+): { line: number; text: string }[] {
   const tables: { line: number; text: string }[] = [];
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   for (let i = 0; i < lines.length - 1; i++) {
     // A pipe table separator line looks like: | --- | --- | or |---|---|
@@ -242,7 +244,7 @@ export function findPipeTables(content: string): { line: number; text: string }[
  */
 export function splitByH2Sections(body: string): H2Section[] {
   const sections: H2Section[] = [];
-  const lines = body.split('\n');
+  const lines = body.split("\n");
   let currentHeading: string | null = null;
   let currentContent: string[] = [];
   let currentLine = 0;
@@ -254,7 +256,7 @@ export function splitByH2Sections(body: string): H2Section[] {
       if (currentHeading !== null) {
         sections.push({
           heading: currentHeading,
-          content: currentContent.join('\n'),
+          content: currentContent.join("\n"),
           line: currentLine,
         });
       }
@@ -270,7 +272,7 @@ export function splitByH2Sections(body: string): H2Section[] {
   if (currentHeading !== null) {
     sections.push({
       heading: currentHeading,
-      content: currentContent.join('\n'),
+      content: currentContent.join("\n"),
       line: currentLine,
     });
   }
