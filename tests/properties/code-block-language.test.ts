@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import * as fc from 'fast-check';
-import { getAllMdxFiles, extractCodeBlocks } from './test-utils';
+import { describe, it, expect } from "vitest";
+import * as fc from "fast-check";
+import { getAllMdxFiles, extractCodeBlocks } from "./test-utils";
 
 /**
  * Property 5: Code block language specification
@@ -10,9 +10,9 @@ import { getAllMdxFiles, extractCodeBlocks } from './test-utils';
  *
  * **Validates: Requirements 8.4**
  */
-describe('Feature: ecs-express-mode-walkthrough, Property 5: Code block language specification', () => {
+describe("Feature: ecs-express-mode-walkthrough, Property 5: Code block language specification", () => {
   const allFiles = getAllMdxFiles();
-  const allowedLanguages = ['hcl', 'python', 'bash', 'json', 'yaml', 'text'];
+  const allowedLanguages = ["hcl", "python", "bash", "json", "yaml", "text"];
 
   // Collect all code blocks with their file context
   const allCodeBlocks = allFiles.flatMap((file) => {
@@ -25,11 +25,11 @@ describe('Feature: ecs-express-mode-walkthrough, Property 5: Code block language
     }));
   });
 
-  it('content pages contain at least one code block to validate', () => {
+  it("content pages contain at least one code block to validate", () => {
     expect(allCodeBlocks.length).toBeGreaterThan(0);
   });
 
-  it('every fenced code block specifies a language identifier', () => {
+  it("every fenced code block specifies a language identifier", () => {
     fc.assert(
       fc.property(fc.constantFrom(...allCodeBlocks), (block) => {
         expect(
@@ -45,12 +45,12 @@ describe('Feature: ecs-express-mode-walkthrough, Property 5: Code block language
     );
   });
 
-  it('every fenced code block uses an allowed language (hcl, python, bash, json, yaml, text)', () => {
+  it("every fenced code block uses an allowed language (hcl, python, bash, json, yaml, text)", () => {
     fc.assert(
       fc.property(fc.constantFrom(...allCodeBlocks), (block) => {
         expect(
           allowedLanguages,
-          `Code block at ${block.file}:${block.line} uses language "${block.language}" which is not in the allowed set: ${allowedLanguages.join(', ')}`,
+          `Code block at ${block.file}:${block.line} uses language "${block.language}" which is not in the allowed set: ${allowedLanguages.join(", ")}`,
         ).toContain(block.language);
       }),
       { numRuns: Math.max(100, allCodeBlocks.length) },

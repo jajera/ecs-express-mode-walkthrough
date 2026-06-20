@@ -1,18 +1,19 @@
 ---
-title: 'Decision Checklist'
-description: 'Compare Express Mode and Classic ECS across key dimensions to decide which deployment model fits your workload.'
+title: "Decision Checklist"
+description: "Compare Express Mode and Classic ECS across key dimensions to decide which deployment model fits your workload."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
 
 ## Express vs Classic ECS
 
 Use this checklist to determine whether <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> or a classic ECS service with self-managed ALB is the right fit for your workload. The table below compares the two approaches across the dimensions that most often influence the decision.
 
 <Aside type="tip">
-  If your application is a stateless HTTPS web app or REST API and you do not need split
-  public/private subnet placement, Express Mode eliminates significant infrastructure wiring.
+  If your application is a stateless HTTPS web app or REST API and you do not
+  need split public/private subnet placement, Express Mode eliminates
+  significant infrastructure wiring.
 </Aside>
 
 <table>
@@ -29,12 +30,12 @@ Use this checklist to determine whether <Tooltip term="Express_Gateway_Service">
         <strong>Subnet Model</strong>
       </td>
       <td>
-        Single subnet list shared by ALB and tasks — all subnets must be the same type (public or
-        private)
+        Single subnet list shared by ALB and tasks — all subnets must be the
+        same type (public or private)
       </td>
       <td>
-        Separate subnet lists for ALB (public) and tasks (private) — supports the common public-ALB
-        + private-tasks pattern
+        Separate subnet lists for ALB (public) and tasks (private) — supports
+        the common public-ALB + private-tasks pattern
       </td>
     </tr>
     <tr>
@@ -42,12 +43,14 @@ Use this checklist to determine whether <Tooltip term="Express_Gateway_Service">
         <strong>Custom Domains</strong>
       </td>
       <td>
-        Uses an auto-provisioned <Tooltip term="Application_URL">Application URL</Tooltip> on{' '}
-        <code>*.ecs.&lt;region&gt;.on.aws</code> — no custom domain or certificate management
+        Uses an auto-provisioned{" "}
+        <Tooltip term="Application_URL">Application URL</Tooltip> on{" "}
+        <code>*.ecs.&lt;region&gt;.on.aws</code> — no custom domain or
+        certificate management
       </td>
       <td>
-        Full control over Route 53 records, ACM certificates, and ALB listener rules for custom
-        domains
+        Full control over Route 53 records, ACM certificates, and ALB listener
+        rules for custom domains
       </td>
     </tr>
     <tr>
@@ -55,12 +58,12 @@ Use this checklist to determine whether <Tooltip term="Express_Gateway_Service">
         <strong>Health Checks</strong>
       </td>
       <td>
-        ALB target group health checks only via <code>health_check_path</code> — no ECS container{' '}
-        <code>healthCheck</code> support
+        ALB target group health checks only via <code>health_check_path</code> —
+        no ECS container <code>healthCheck</code> support
       </td>
       <td>
-        Both ALB target group health checks and ECS container-level <code>healthCheck</code>{' '}
-        (command-based) available
+        Both ALB target group health checks and ECS container-level{" "}
+        <code>healthCheck</code> (command-based) available
       </td>
     </tr>
     <tr>
@@ -68,13 +71,13 @@ Use this checklist to determine whether <Tooltip term="Express_Gateway_Service">
         <strong>Deployment Strategy</strong>
       </td>
       <td>
-        Managed rolling deployment with automatic{' '}
-        <Tooltip term="RollbackAlarm">RollbackAlarm</Tooltip> — no blue/green or external deployment
-        controller
+        Managed rolling deployment with automatic{" "}
+        <Tooltip term="RollbackAlarm">RollbackAlarm</Tooltip> — no blue/green or
+        external deployment controller
       </td>
       <td>
-        Rolling update, blue/green (CodeDeploy), or external deployment controllers — full strategy
-        control
+        Rolling update, blue/green (CodeDeploy), or external deployment
+        controllers — full strategy control
       </td>
     </tr>
     <tr>
@@ -82,11 +85,11 @@ Use this checklist to determine whether <Tooltip term="Express_Gateway_Service">
         <strong>Container Health</strong>
       </td>
       <td>
-        Health status shows "Unknown" on the Tasks tab — operational health determined by ALB target
-        group state only
+        Health status shows "Unknown" on the Tasks tab — operational health
+        determined by ALB target group state only
       </td>
       <td>
-        Container health status reported via ECS agent using task definition{' '}
+        Container health status reported via ECS agent using task definition{" "}
         <code>healthCheck</code> command
       </td>
     </tr>
@@ -94,10 +97,12 @@ Use this checklist to determine whether <Tooltip term="Express_Gateway_Service">
       <td>
         <strong>Protocol Support</strong>
       </td>
-      <td>HTTP/HTTPS only — designed for REST APIs and stateless web applications</td>
       <td>
-        HTTP, HTTPS, gRPC (via ALB), TCP/UDP (via NLB), and any protocol supported by ECS task
-        networking
+        HTTP/HTTPS only — designed for REST APIs and stateless web applications
+      </td>
+      <td>
+        HTTP, HTTPS, gRPC (via ALB), TCP/UDP (via NLB), and any protocol
+        supported by ECS task networking
       </td>
     </tr>
     <tr>
@@ -105,12 +110,12 @@ Use this checklist to determine whether <Tooltip term="Express_Gateway_Service">
         <strong>ALB Control</strong>
       </td>
       <td>
-        <Tooltip term="Shared_ALB">Shared ALB</Tooltip> managed by ECS — up to 25 Express services
-        per VPC share one ALB with Host header routing
+        <Tooltip term="Shared_ALB">Shared ALB</Tooltip> managed by ECS — up to
+        25 Express services per VPC share one ALB with Host header routing
       </td>
       <td>
-        Dedicated or shared ALB fully managed in your Terraform — custom listener rules, multiple
-        target groups, WAF integration
+        Dedicated or shared ALB fully managed in your Terraform — custom
+        listener rules, multiple target groups, WAF integration
       </td>
     </tr>
   </tbody>
@@ -125,8 +130,10 @@ Review each dimension against your workload requirements:
 3. **If unsure about protocol requirements** — Express Mode only supports HTTP/HTTPS; any gRPC, TCP, or UDP traffic requires classic ECS
 
 <Aside type="caution">
-  The first <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> deployed in a
-  VPC determines whether the <Tooltip term="Shared_ALB">Shared ALB</Tooltip> is internet-facing or
+  The first{" "}
+  <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip>{" "}
+  deployed in a VPC determines whether the{" "}
+  <Tooltip term="Shared_ALB">Shared ALB</Tooltip> is internet-facing or
   internal. All subsequent Express services in that VPC share the same ALB type.
 </Aside>
 

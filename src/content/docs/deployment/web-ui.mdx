@@ -1,10 +1,10 @@
 ---
-title: 'Accessing the Web UI'
-description: 'How to access the Swagger UI at the /docs path and use the Bedrock image analysis API for multimodal inference.'
+title: "Accessing the Web UI"
+description: "How to access the Swagger UI at the /docs path and use the Bedrock image analysis API for multimodal inference."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
 
 ## Swagger UI
 
@@ -19,8 +19,9 @@ Copy the printed URL into your browser's address bar. The root URL returns 404 b
 The Swagger UI provides an interactive interface for exploring and testing the API endpoints without needing a separate HTTP client. You can view request schemas, try out endpoints directly in the browser, and inspect response payloads.
 
 <Aside type="tip">
-  Use the Application URL (<code>*.ecs.&lt;region&gt;.on.aws</code>) rather than the raw ALB DNS
-  name. Express Mode routes traffic via Host header matching on the Application URL.
+  Use the Application URL (<code>*.ecs.&lt;region&gt;.on.aws</code>) rather than
+  the raw ALB DNS name. Express Mode routes traffic via Host header matching on
+  the Application URL.
 </Aside>
 
 ![PLACEHOLDER: Swagger UI at /docs endpoint](https://placeholder.test/swagger-ui-docs-endpoint.png)
@@ -40,9 +41,9 @@ The image analysis request follows this path:
 5. The container returns the model's analysis as a JSON response to the client
 
 <Aside type="note">
-  The Task Role attached to the ECS task grants <code>bedrock:InvokeModel</code> permission for both
-  foundation model ARNs and inference profile ARNs. Without this permission, requests to the analyze
-  endpoint return a 403 error.
+  The Task Role attached to the ECS task grants <code>bedrock:InvokeModel</code>{" "}
+  permission for both foundation model ARNs and inference profile ARNs. Without
+  this permission, requests to the analyze endpoint return a 403 error.
 </Aside>
 
 ### Supported Image Input Methods
@@ -62,15 +63,16 @@ The API supports multiple ways to provide an image for analysis:
       <td>Base64-encoded string</td>
       <td>Image data encoded as a base64 string in the JSON request body</td>
       <td>
-        Include the image bytes directly in the <code>image</code> field of the POST payload
+        Include the image bytes directly in the <code>image</code> field of the
+        POST payload
       </td>
     </tr>
     <tr>
       <td>URL reference</td>
       <td>A publicly accessible URL pointing to the image file</td>
       <td>
-        Pass the image URL in the <code>image_url</code> field and the container fetches it before sending
-        to Bedrock
+        Pass the image URL in the <code>image_url</code> field and the container
+        fetches it before sending to Bedrock
       </td>
     </tr>
   </tbody>
@@ -92,9 +94,10 @@ The API returns a JSON response containing the model's analysis:
 The response includes the generated description, the model identifier used for inference, and token usage metrics. Token counts help you estimate costs and monitor usage patterns.
 
 <Aside type="caution">
-  Bedrock model availability varies by region. Ensure your deployment region supports the configured
-  foundation model. If the model is unavailable, the analyze endpoint returns a service error
-  indicating the model cannot be accessed.
+  Bedrock model availability varies by region. Ensure your deployment region
+  supports the configured foundation model. If the model is unavailable, the
+  analyze endpoint returns a service error indicating the model cannot be
+  accessed.
 </Aside>
 
 ## Testing the API

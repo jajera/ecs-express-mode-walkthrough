@@ -1,14 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
     <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      html, body {
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
         width: 1536px;
         height: 1024px;
         background: #ffffff;
-        font-family: Segoe UI, Helvetica Neue, Arial, sans-serif;
+        font-family:
+          Segoe UI,
+          Helvetica Neue,
+          Arial,
+          sans-serif;
         color: #111111;
       }
       .frame {
@@ -35,7 +44,9 @@
         padding: 24px 32px;
         vertical-align: middle;
       }
-      thead th:first-child { width: 520px; }
+      thead th:first-child {
+        width: 520px;
+      }
       tbody td {
         background: #ffffff;
         border-top: 1px solid #d1d5db;
@@ -55,7 +66,11 @@
         line-height: 1.35;
       }
       tbody td.desc code {
-        font-family: Consolas, Monaco, Courier New, monospace;
+        font-family:
+          Consolas,
+          Monaco,
+          Courier New,
+          monospace;
         font-size: 24px;
       }
     </style>
@@ -70,30 +85,52 @@
           </tr>
         </thead>
         <tbody>
-        <tr>
-          <td class="term">Express Gateway Service:</td>
-          <td class="desc">Single Terraform resource (<code>aws_ecs_express_gateway_service</code>) that provisions the entire HTTP/HTTPS stack.</td>
-        </tr>
-        <tr>
-          <td class="term">Managed ALB:</td>
-          <td class="desc">ECS provisions a Shared Application Load Balancer — no separate <code>aws_lb</code>, target group, or listener resources.</td>
-        </tr>
-        <tr>
-          <td class="term">Health Checks:</td>
-          <td class="desc">ALB target group health checks configured via <code>health_check_path</code> on the express gateway service.</td>
-        </tr>
-        <tr>
-          <td class="term">Auto Scaling:</td>
-          <td class="desc">Built-in target tracking via <code>scaling_target</code> — no separate <code>aws_appautoscaling_target</code>.</td>
-        </tr>
-        <tr>
-          <td class="term">Application URL:</td>
-          <td class="desc">Unique HTTPS endpoint on <code>*.ecs.&lt;region&gt;.on.aws</code> for all normal application traffic.</td>
-        </tr>
-        <tr>
-          <td class="term">Classic ECS Alternative:</td>
-          <td class="desc">Requires separate <code>aws_lb</code>, <code>aws_lb_target_group</code>, <code>aws_lb_listener</code>, <code>aws_ecs_service</code>, and <code>aws_appautoscaling_target</code> wired together manually.</td>
-        </tr>
+          <tr>
+            <td class="term">Express Gateway Service:</td>
+            <td class="desc">
+              Single Terraform resource
+              (<code>aws_ecs_express_gateway_service</code>) that provisions the
+              entire HTTP/HTTPS stack.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Managed ALB:</td>
+            <td class="desc">
+              ECS provisions a Shared Application Load Balancer — no separate
+              <code>aws_lb</code>, target group, or listener resources.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Health Checks:</td>
+            <td class="desc">
+              ALB target group health checks configured via
+              <code>health_check_path</code> on the express gateway service.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Auto Scaling:</td>
+            <td class="desc">
+              Built-in target tracking via <code>scaling_target</code> — no
+              separate <code>aws_appautoscaling_target</code>.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Application URL:</td>
+            <td class="desc">
+              Unique HTTPS endpoint on
+              <code>*.ecs.&lt;region&gt;.on.aws</code> for all normal
+              application traffic.
+            </td>
+          </tr>
+          <tr>
+            <td class="term">Classic ECS Alternative:</td>
+            <td class="desc">
+              Requires separate <code>aws_lb</code>,
+              <code>aws_lb_target_group</code>, <code>aws_lb_listener</code>,
+              <code>aws_ecs_service</code>, and
+              <code>aws_appautoscaling_target</code> wired together manually.
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

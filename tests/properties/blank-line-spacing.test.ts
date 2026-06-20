@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import * as fc from 'fast-check';
-import { getAllMdxFiles } from './test-utils';
+import { describe, it, expect } from "vitest";
+import * as fc from "fast-check";
+import { getAllMdxFiles } from "./test-utils";
 
 /**
  * Property 8: Blank line after component/HTML tags
@@ -14,8 +14,8 @@ import { getAllMdxFiles } from './test-utils';
  *
  * **Validates: Requirements 8.5**
  */
-describe('Feature: ecs-express-mode-walkthrough, Property 8: Blank line after component/HTML tags', () => {
-  const BLOCK_CLOSING_TAGS = ['</Aside>', '</table>'];
+describe("Feature: ecs-express-mode-walkthrough, Property 8: Blank line after component/HTML tags", () => {
+  const BLOCK_CLOSING_TAGS = ["</Aside>", "</table>"];
 
   interface ClosingTagOccurrence {
     file: string;
@@ -29,7 +29,7 @@ describe('Feature: ecs-express-mode-walkthrough, Property 8: Blank line after co
   const occurrences: ClosingTagOccurrence[] = [];
 
   for (const file of allFiles) {
-    const lines = file.body.split('\n');
+    const lines = file.body.split("\n");
     for (let i = 0; i < lines.length; i++) {
       const trimmed = lines[i].trim();
       for (const tag of BLOCK_CLOSING_TAGS) {
@@ -45,21 +45,21 @@ describe('Feature: ecs-express-mode-walkthrough, Property 8: Blank line after co
     }
   }
 
-  it('MDX files contain at least one block-level closing tag to validate', () => {
+  it("MDX files contain at least one block-level closing tag to validate", () => {
     expect(occurrences.length).toBeGreaterThan(0);
   });
 
-  it('after every block-level closing tag, there is a blank line before next content', () => {
+  it("after every block-level closing tag, there is a blank line before next content", () => {
     fc.assert(
       fc.property(fc.constantFrom(...occurrences), (occurrence) => {
         const file = allFiles.find((f) => f.relativePath === occurrence.file)!;
-        const lines = file.body.split('\n');
+        const lines = file.body.split("\n");
         const closingLineIndex = occurrence.lineNumber - 1;
 
         // Find the next non-empty line after the closing tag
         let nextNonEmptyIndex = -1;
         for (let i = closingLineIndex + 1; i < lines.length; i++) {
-          if (lines[i].trim() !== '') {
+          if (lines[i].trim() !== "") {
             nextNonEmptyIndex = i;
             break;
           }

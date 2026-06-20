@@ -3,9 +3,9 @@ title: ECS Express Mode Concepts
 description: What Express Mode is, how it differs from classic ECS, supported workloads, and the single subnet limitation.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
-import expressModeCreateWizard from '../../../assets/screenshots/ecs-express-mode/express-mode-create-wizard.png';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
+import expressModeCreateWizard from "../../../assets/screenshots/ecs-express-mode/express-mode-create-wizard.png";
 
 ## What Is Express Mode?
 
@@ -14,13 +14,17 @@ import expressModeCreateWizard from '../../../assets/screenshots/ecs-express-mod
 In classic ECS, you wire together `aws_lb`, `aws_lb_target_group`, `aws_lb_listener`, `aws_ecs_service`, and `aws_appautoscaling_target`. Express Mode collapses all of this into one resource.
 
 <Aside type="note">
-  Express Mode is specifically designed for stateless HTTP/HTTPS web applications and APIs. It is
-  not a general-purpose replacement for all ECS workloads.
+  Express Mode is specifically designed for stateless HTTP/HTTPS web
+  applications and APIs. It is not a general-purpose replacement for all ECS
+  workloads.
 </Aside>
 
 The <Tooltip term="Shared_ALB">Shared ALB</Tooltip> hosts up to 25 Express services in the same <Tooltip term="VPC">VPC</Tooltip> using Host header routing. The first service in a VPC determines whether the ALB is internet-facing or internal.
 
-<img src={expressModeCreateWizard.src} alt="Express Mode create wizard in ECS console" />
+<img
+  src={expressModeCreateWizard.src}
+  alt="Express Mode create wizard in ECS console"
+/>
 
 ## Express Mode vs Classic ECS
 
@@ -38,7 +42,9 @@ The <Tooltip term="Shared_ALB">Shared ALB</Tooltip> hosts up to 25 Express servi
       <td>
         Single <code>aws_ecs_express_gateway_service</code> resource
       </td>
-      <td>Separate ALB, target group, listener, service, and scaling resources</td>
+      <td>
+        Separate ALB, target group, listener, service, and scaling resources
+      </td>
     </tr>
     <tr>
       <td>Infrastructure wiring</td>
@@ -105,8 +111,9 @@ Use classic ECS for these:
 - **Non-HTTP services** — anything that cannot respond to ALB health checks
 
 <Aside type="caution">
-  Deploying a non-HTTP workload with Express Mode results in perpetual health check failures and
-  rollback loops. Use classic ECS with an NLB or no load balancer.
+  Deploying a non-HTTP workload with Express Mode results in perpetual health
+  check failures and rollback loops. Use classic ECS with an NLB or no load
+  balancer.
 </Aside>
 
 ## Single Subnet Limitation
@@ -117,5 +124,6 @@ Classic ECS lets you place the ALB in public subnets while running tasks in priv
 - **Private subnets** (no IGW route) → internal ALB, reachable only within the <Tooltip term="VPC">VPC</Tooltip>
 
 <Aside type="caution">
-  If you need public ALB with private tasks, use classic ECS with separate subnet configurations.
+  If you need public ALB with private tasks, use classic ECS with separate
+  subnet configurations.
 </Aside>

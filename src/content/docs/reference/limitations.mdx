@@ -1,18 +1,18 @@
 ---
-title: 'Limitations'
-description: 'Express Mode constraints including immutable fields, single subnet model, and Shared ALB type determination.'
+title: "Limitations"
+description: "Express Mode constraints including immutable fields, single subnet model, and Shared ALB type determination."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
 
 ## Immutable-at-Create Fields
 
 Several configuration fields in the <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> are set once at creation time and cannot be modified afterward. Changing any of these requires destroying the service and recreating it from scratch.
 
 <Aside type="caution">
-  Modifying an immutable field means replacing the entire Express service. Plan these values
-  carefully before your first deployment.
+  Modifying an immutable field means replacing the entire Express service. Plan
+  these values carefully before your first deployment.
 </Aside>
 
 <table>
@@ -43,8 +43,8 @@ Several configuration fields in the <Tooltip term="Express_Gateway_Service">Expr
         <code>infrastructure_role_arn</code>
       </td>
       <td>
-        The <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip> ARN granting Express
-        Mode permissions
+        The <Tooltip term="Infrastructure_Role">Infrastructure Role</Tooltip>{" "}
+        ARN granting Express Mode permissions
       </td>
       <td>Service replacement required</td>
     </tr>
@@ -56,7 +56,8 @@ Several configuration fields in the <Tooltip term="Express_Gateway_Service">Expr
     <tr>
       <td>Load balancer config</td>
       <td>
-        The <Tooltip term="Shared_ALB">Shared ALB</Tooltip> target group and listener settings
+        The <Tooltip term="Shared_ALB">Shared ALB</Tooltip> target group and
+        listener settings
       </td>
       <td>Service replacement required</td>
     </tr>
@@ -101,9 +102,9 @@ The subnet type you choose determines the ALB type and accessibility:
 </table>
 
 <Aside type="note">
-  There is no ALB-in-public plus tasks-in-private option with Express Mode. If your architecture
-  requires public ingress with private compute, use classic ECS with a separately managed ALB and
-  distinct subnet assignments for each.
+  There is no ALB-in-public plus tasks-in-private option with Express Mode. If
+  your architecture requires public ingress with private compute, use classic
+  ECS with a separately managed ALB and distinct subnet assignments for each.
 </Aside>
 
 ## Shared ALB Type Determination
@@ -116,8 +117,9 @@ This means:
 - If your first Express service uses private subnets, the Shared ALB becomes internal — all future Express services in that VPC will only be reachable within the VPC.
 
 <Aside type="caution">
-  You cannot mix internet-facing and internal Express services in the same VPC. Plan your first
-  Express service subnet choice knowing it locks the ALB type for all Express services in that VPC.
+  You cannot mix internet-facing and internal Express services in the same VPC.
+  Plan your first Express service subnet choice knowing it locks the ALB type
+  for all Express services in that VPC.
 </Aside>
 
 To change the Shared ALB type, you must remove all Express services in the VPC and redeploy the first one with the desired subnet type.

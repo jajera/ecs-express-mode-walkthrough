@@ -1,10 +1,10 @@
 ---
-title: 'Public Subnets'
-description: 'Public subnet configuration with map_public_ip_on_launch and cidrsubnet allocation strategy for ECS Express Mode.'
+title: "Public Subnets"
+description: "Public subnet configuration with map_public_ip_on_launch and cidrsubnet allocation strategy for ECS Express Mode."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
 
 ## Overview
 
@@ -31,9 +31,10 @@ resource "aws_subnet" "public" {
 The `map_public_ip_on_launch` attribute ensures every resource launched in the subnet — including ECS tasks — receives a public IPv4 address automatically.
 
 <Aside type="note">
-  Without `map_public_ip_on_launch = true`, ECS tasks launched by Express Mode would not receive
-  public IPs. They would be unable to reach the internet for image pulls, AWS API calls, or outbound
-  traffic — even if the subnet has a route to an Internet Gateway.
+  Without `map_public_ip_on_launch = true`, ECS tasks launched by Express Mode
+  would not receive public IPs. They would be unable to reach the internet for
+  image pulls, AWS API calls, or outbound traffic — even if the subnet has a
+  route to an Internet Gateway.
 </Aside>
 
 Express Mode does not provision a NAT gateway. Tasks in <Tooltip term="Public_Subnet">public subnets</Tooltip> rely on their assigned public IP for all outbound connectivity. Setting this attribute to `true` eliminates the need for NAT infrastructure and keeps the deployment minimal.
@@ -95,8 +96,9 @@ With a <Tooltip term="VPC">VPC</Tooltip> CIDR of `10.0.0.0/16` and `newbits = 8`
 </table>
 
 <Aside type="tip">
-  AWS reserves the first four IPs and the last IP in each subnet (network address, VPC router, DNS
-  server, future use, and broadcast). That is why 256 addresses yield only 251 usable hosts.
+  AWS reserves the first four IPs and the last IP in each subnet (network
+  address, VPC router, DNS server, future use, and broadcast). That is why 256
+  addresses yield only 251 usable hosts.
 </Aside>
 
 If you need more subnets — for example, to span three availability zones — increase the `count` value. The `cidrsubnet` function with `netnum = 2` would produce `10.0.2.0/24`, and so on up to 255 possible /24 subnets within the /16 VPC.
@@ -111,7 +113,8 @@ The <Tooltip term="Express_Gateway_Service">Express Gateway Service</Tooltip> ne
 - **Multi-AZ requirement** — the ALB requires subnets in at least two availability zones. The `count = 2` pattern with `data.aws_availability_zones` satisfies this.
 
 <Aside type="caution">
-  Express Mode uses a single subnet list for both the ALB and tasks. If you pass public subnets,
-  both the ALB and your tasks receive public IPs. There is no option to place the ALB in public
-  subnets while keeping tasks in private subnets — that pattern requires classic ECS.
+  Express Mode uses a single subnet list for both the ALB and tasks. If you pass
+  public subnets, both the ALB and your tasks receive public IPs. There is no
+  option to place the ALB in public subnets while keeping tasks in private
+  subnets — that pattern requires classic ECS.
 </Aside>

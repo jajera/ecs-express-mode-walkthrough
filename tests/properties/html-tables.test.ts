@@ -1,6 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import * as fc from 'fast-check';
-import { getAllMdxFiles, hasCustomComponentImports, findPipeTables } from './test-utils';
+import { describe, it, expect } from "vitest";
+import * as fc from "fast-check";
+import {
+  getAllMdxFiles,
+  hasCustomComponentImports,
+  findPipeTables,
+} from "./test-utils";
 
 /**
  * Property 6: HTML tables when components are imported
@@ -11,15 +15,17 @@ import { getAllMdxFiles, hasCustomComponentImports, findPipeTables } from './tes
  *
  * **Validates: Requirements 8.1**
  */
-describe('Feature: ecs-express-mode-walkthrough, Property 6: HTML tables when components are imported', () => {
+describe("Feature: ecs-express-mode-walkthrough, Property 6: HTML tables when components are imported", () => {
   const allFiles = getAllMdxFiles();
-  const pagesWithComponents = allFiles.filter((f) => hasCustomComponentImports(f.body));
+  const pagesWithComponents = allFiles.filter((f) =>
+    hasCustomComponentImports(f.body),
+  );
 
-  it('at least one page imports custom components', () => {
+  it("at least one page imports custom components", () => {
     expect(pagesWithComponents.length).toBeGreaterThan(0);
   });
 
-  it('pages with custom component imports contain no pipe tables', () => {
+  it("pages with custom component imports contain no pipe tables", () => {
     fc.assert(
       fc.property(fc.constantFrom(...pagesWithComponents), (page) => {
         const pipeTables = findPipeTables(page.body);

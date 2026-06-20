@@ -3,14 +3,15 @@ title: Overview
 description: What ECS Express Mode is, the demo architecture, and what this walkthrough covers.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../components/Tooltip.astro";
 
 ## What is ECS Express Mode?
 
-<Tooltip term="Express_Gateway_Service">ECS Express Mode</Tooltip> is a simplified deployment model
-for Amazon ECS. It lets you deploy stateless HTTP/HTTPS containers without provisioning separate
-ALB, target group, listener, or auto scaling resources.
+<Tooltip term="Express_Gateway_Service">ECS Express Mode</Tooltip> is a
+simplified deployment model for Amazon ECS. It lets you deploy stateless
+HTTP/HTTPS containers without provisioning separate ALB, target group, listener,
+or auto scaling resources.
 
 Your entire service infrastructure becomes one Terraform resource:
 
@@ -133,7 +134,9 @@ This walkthrough documents a working project: a <Tooltip term="Bedrock">Bedrock<
   <tbody>
     <tr>
       <td>ECS Express Mode</td>
-      <td>Concepts, Express Gateway Service resource, auto scaling, health checks</td>
+      <td>
+        Concepts, Express Gateway Service resource, auto scaling, health checks
+      </td>
     </tr>
     <tr>
       <td>IAM Roles</td>
@@ -141,7 +144,9 @@ This walkthrough documents a working project: a <Tooltip term="Bedrock">Bedrock<
     </tr>
     <tr>
       <td>Networking</td>
-      <td>VPC layout, security groups, public subnets, ingress configuration</td>
+      <td>
+        VPC layout, security groups, public subnets, ingress configuration
+      </td>
     </tr>
     <tr>
       <td>Deployment</td>

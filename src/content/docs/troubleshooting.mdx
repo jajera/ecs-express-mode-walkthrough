@@ -1,10 +1,10 @@
 ---
-title: 'Troubleshooting'
-description: 'Diagnose and fix common ECS Express Mode deployment failures including rollback loops, health check issues, and 503 errors.'
+title: "Troubleshooting"
+description: "Diagnose and fix common ECS Express Mode deployment failures including rollback loops, health check issues, and 503 errors."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../components/Tooltip.astro";
 
 ## Symptom-to-Cause Reference
 
@@ -22,14 +22,15 @@ Use this table to identify the likely cause of your deployment issue:
     <tr>
       <td>Service spinning / rollback loops</td>
       <td>
-        New tasks fail ALB health checks repeatedly, triggering{' '}
+        New tasks fail ALB health checks repeatedly, triggering{" "}
         <Tooltip term="RollbackAlarm">RollbackAlarm</Tooltip>
       </td>
       <td>EC2 → Target Groups → Targets tab (health reason)</td>
     </tr>
     <tr>
       <td>
-        503 errors from <Tooltip term="Application_URL">Application URL</Tooltip>
+        503 errors from{" "}
+        <Tooltip term="Application_URL">Application URL</Tooltip>
       </td>
       <td>No healthy targets registered in the target group</td>
       <td>EC2 → Target Groups → Targets tab</td>
@@ -40,25 +41,32 @@ Use this table to identify the likely cause of your deployment issue:
         <Tooltip term="VPC">VPC</Tooltip> DNS support or hostnames not enabled
       </td>
       <td>
-        VPC settings: <code>enable_dns_support</code>, <code>enable_dns_hostnames</code>
+        VPC settings: <code>enable_dns_support</code>,{" "}
+        <code>enable_dns_hostnames</code>
       </td>
     </tr>
     <tr>
       <td>Health status "Unknown" on Tasks tab</td>
-      <td>Normal and expected — Express Mode does not define container-level healthCheck</td>
+      <td>
+        Normal and expected — Express Mode does not define container-level
+        healthCheck
+      </td>
       <td>No action needed (see explanation below)</td>
     </tr>
     <tr>
       <td>Target group unhealthy</td>
       <td>
-        <Tooltip term="Security_Group">Security group</Tooltip> missing ingress, container crash,
-        wrong health path, or port mismatch
+        <Tooltip term="Security_Group">Security group</Tooltip> missing ingress,
+        container crash, wrong health path, or port mismatch
       </td>
       <td>EC2 → Target Groups → health reason column</td>
     </tr>
     <tr>
       <td>Deployment rollback</td>
-      <td>ALB health checks fail within the deregistration delay, RollbackAlarm fires</td>
+      <td>
+        ALB health checks fail within the deregistration delay, RollbackAlarm
+        fires
+      </td>
       <td>ECS → Service → Events/Timeline, CloudWatch Alarms</td>
     </tr>
   </tbody>
@@ -76,8 +84,8 @@ When a deployment fails, <Tooltip term="Express_Gateway_Service">Express Mode</T
 6. The cycle repeats on the next deployment attempt until the root cause is fixed
 
 <Aside type="caution">
-  Rollback loops will continue indefinitely. Express Mode does not stop retrying — you must fix the
-  underlying issue before the next deployment succeeds.
+  Rollback loops will continue indefinitely. Express Mode does not stop retrying
+  — you must fix the underlying issue before the next deployment succeeds.
 </Aside>
 
 ![PLACEHOLDER: ECS Timeline showing rollback events](https://placeholder.test/ecs-timeline-rollback-events)
@@ -128,8 +136,9 @@ curl -v http://<task-private-ip>:<container-port>/health
 This confirms whether the container is actually serving traffic on the expected port and path.
 
 <Aside type="tip">
-  If curl succeeds from inside the VPC but the target group shows unhealthy, the issue is likely a
-  security group rule — the ALB cannot reach the task on the container port.
+  If curl succeeds from inside the VPC but the target group shows unhealthy, the
+  issue is likely a security group rule — the ALB cannot reach the task on the
+  container port.
 </Aside>
 
 ## Common Root Causes
@@ -167,23 +176,25 @@ The `health_check_path` in the <Tooltip term="Express_Gateway_Service">Express G
 The `container_port` in the task definition must match the port your application actually listens on. If the app binds to port 8080 but `container_port` is set to 3000, the ALB cannot reach it.
 
 <Aside type="danger">
-  Port mismatches produce "Request timeout" in the target group health reason because the ALB sends
-  probes to a port with no listener. The container appears healthy from its own perspective but is
-  unreachable by the ALB.
+  Port mismatches produce "Request timeout" in the target group health reason
+  because the ALB sends probes to a port with no listener. The container appears
+  healthy from its own perspective but is unreachable by the ALB.
 </Aside>
 
 ## Health Status "Unknown" Is Expected
 
 When viewing the ECS Tasks tab, you may see **Health status: Unknown** for your Express Mode tasks. This is normal and expected behavior.
 
-<Tooltip term="Express_Gateway_Service">Express Mode</Tooltip> does not define a container-level
-`healthCheck` in the task definition. Instead, it relies entirely on ALB target group health checks
-to determine whether tasks are healthy. The "Unknown" status simply means ECS has no container-level
-health information — it does not indicate a problem.
+<Tooltip term="Express_Gateway_Service">Express Mode</Tooltip> does not define a
+container-level `healthCheck` in the task definition. Instead, it relies
+entirely on ALB target group health checks to determine whether tasks are
+healthy. The "Unknown" status simply means ECS has no container-level health
+information — it does not indicate a problem.
 
 <Aside type="note">
-  Operational health for Express Mode services is determined by the ALB target group state, not the
-  ECS Health status column. Check EC2 → Target Groups → Targets for the actual health of your tasks.
+  Operational health for Express Mode services is determined by the ALB target
+  group state, not the ECS Health status column. Check EC2 → Target Groups →
+  Targets for the actual health of your tasks.
 </Aside>
 
 To confirm your service is healthy:

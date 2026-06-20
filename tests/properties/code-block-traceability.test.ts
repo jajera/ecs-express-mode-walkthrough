@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import * as fc from 'fast-check';
-import { getAllMdxFiles, extractCodeBlocks } from './test-utils';
+import { describe, it, expect } from "vitest";
+import * as fc from "fast-check";
+import { getAllMdxFiles, extractCodeBlocks } from "./test-utils";
 
 /**
  * Property 4: Code block source traceability
@@ -15,14 +15,14 @@ import { getAllMdxFiles, extractCodeBlocks } from './test-utils';
  *
  * **Validates: Requirements 4.5, 5.5, 6.5**
  */
-describe('Feature: ecs-express-mode-walkthrough, Property 4: Code block source traceability', () => {
+describe("Feature: ecs-express-mode-walkthrough, Property 4: Code block source traceability", () => {
   const allFiles = getAllMdxFiles();
 
   // Collect all HCL code blocks with their file context
   const hclBlocks = allFiles.flatMap((file) => {
     const blocks = extractCodeBlocks(file.body);
     return blocks
-      .filter((block) => block.language === 'hcl')
+      .filter((block) => block.language === "hcl")
       .map((block) => ({
         file: file.relativePath,
         line: block.line,
@@ -31,17 +31,17 @@ describe('Feature: ecs-express-mode-walkthrough, Property 4: Code block source t
       }));
   });
 
-  it('content pages contain at least one HCL code block to validate', () => {
+  it("content pages contain at least one HCL code block to validate", () => {
     expect(hclBlocks.length).toBeGreaterThan(0);
   });
 
-  it('every HCL code block has a title attribute referencing the source filename', () => {
+  it("every HCL code block has a title attribute referencing the source filename", () => {
     fc.assert(
       fc.property(fc.constantFrom(...hclBlocks), (block) => {
         // HCL blocks represent Terraform source files and must have a title
         expect(block.title).not.toBeNull();
         // Title should be a non-empty string (e.g., "main.tf", "outputs.tf")
-        expect(typeof block.title).toBe('string');
+        expect(typeof block.title).toBe("string");
         expect(block.title!.length).toBeGreaterThan(0);
       }),
       { numRuns: Math.max(100, hclBlocks.length) },

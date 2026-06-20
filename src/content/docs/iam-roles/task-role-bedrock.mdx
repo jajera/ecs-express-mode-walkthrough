@@ -1,10 +1,10 @@
 ---
-title: 'Task Role — Bedrock Access'
-description: 'IAM Task Role granting the running container permissions to invoke Bedrock foundation models and inference profiles.'
+title: "Task Role — Bedrock Access"
+description: "IAM Task Role granting the running container permissions to invoke Bedrock foundation models and inference profiles."
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-import Tooltip from '../../../components/Tooltip.astro';
+import { Aside } from "@astrojs/starlight/components";
+import Tooltip from "../../../components/Tooltip.astro";
 
 ## Overview
 
@@ -68,7 +68,8 @@ resource "aws_iam_role_policy" "task_bedrock" {
 ## Why Both ARN Patterns Are Required
 
 <Tooltip term="Foundation_Model">Foundation models</Tooltip> and
-<Tooltip term="Inference_Profile">inference profiles</Tooltip> use different ARN formats in
+<Tooltip term="Inference_Profile">inference profiles</Tooltip> use different ARN
+formats in
 <Tooltip term="Bedrock">Bedrock</Tooltip>
 because they represent different resource types with different ownership models.
 
@@ -88,7 +89,10 @@ because they represent different resource types with different ownership models.
         <code>arn:aws:bedrock:*::foundation-model/*</code>
       </td>
       <td>Empty (no account)</td>
-      <td>Foundation models are AWS-managed global resources not owned by any customer account</td>
+      <td>
+        Foundation models are AWS-managed global resources not owned by any
+        customer account
+      </td>
     </tr>
     <tr>
       <td>Inference Profile</td>
@@ -97,24 +101,26 @@ because they represent different resource types with different ownership models.
       </td>
       <td>Wildcard (any account)</td>
       <td>
-        Inference profiles can be account-specific or cross-region, requiring the account field
+        Inference profiles can be account-specific or cross-region, requiring
+        the account field
       </td>
     </tr>
   </tbody>
 </table>
 
 <Aside type="note">
-  The foundation model ARN has an empty account field (double colon `::`) because these models are
-  owned by AWS, not by your account. Inference profiles include an account field because they can be
-  configured per-account for cross-region routing and model parameter customization.
+  The foundation model ARN has an empty account field (double colon `::`)
+  because these models are owned by AWS, not by your account. Inference profiles
+  include an account field because they can be configured per-account for
+  cross-region routing and model parameter customization.
 </Aside>
 
 If you only include the foundation model ARN, direct `InvokeModel` calls using a model ID work, but requests routed through an inference profile fail with an `AccessDeniedException`. Including both ARN patterns ensures the application can invoke models regardless of whether the request targets a model directly or goes through an inference profile.
 
 <Aside type="tip">
-  When the Bedrock SDK resolves a model identifier, it may route through a cross-region inference
-  profile transparently. Always include both ARN patterns to avoid unexpected access errors in
-  production.
+  When the Bedrock SDK resolves a model identifier, it may route through a
+  cross-region inference profile transparently. Always include both ARN patterns
+  to avoid unexpected access errors in production.
 </Aside>
 
 ## Role Attachment to the Express Gateway Service

@@ -27,15 +27,32 @@ An [Astro Starlight](https://starlight.astro.build/) site with concept explanati
 
 ## Quick start
 
-Use Node 22 (see .nvmrc).
+Use Node 22 (see `.nvmrc`).
 
-    npm install
-    npm run dev
+```bash
+npm ci
+npm run dev
+```
 
 Open http://localhost:4321/ecs-express-mode-walkthrough/
 
-    npm run build   # production build (draft pages excluded)
-    npm run preview # serve the build locally
+## Scripts
+
+| Script             | Purpose                                            |
+| ------------------ | -------------------------------------------------- |
+| `npm run dev`      | Start local development server                     |
+| `npm run build`    | Production build to `dist/`                        |
+| `npm run preview`  | Serve the production build locally                 |
+| `npm run validate` | Prettier check, markdownlint, and content rules    |
+| `npm run format`   | Auto-format with Prettier                          |
+| `npm run lint`     | Lint MDX files in `src/`                           |
+| `npm run test`     | Property-based content tests (Vitest + fast-check) |
+
+Run the full quality gate before committing:
+
+```bash
+npm run validate && npm run test && npm run build
+```
 
 ## Deploy
 
