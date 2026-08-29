@@ -1,7 +1,7 @@
 # ecs-express-mode-walkthrough
 
 [![Deploy to GitHub Pages](https://github.com/jajera/ecs-express-mode-walkthrough/actions/workflows/deploy.yml/badge.svg)](https://github.com/jajera/ecs-express-mode-walkthrough/actions/workflows/deploy.yml)
-[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://jajera.github.io/ecs-express-mode-walkthrough/)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://ecs-express-mode-walkthrough.johna.kiwi/)
 
 ECS Express Mode by example
 
@@ -34,7 +34,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:4321/ecs-express-mode-walkthrough/
+Open http://localhost:4321/
 
 ## Scripts
 
