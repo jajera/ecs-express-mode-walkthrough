@@ -11,6 +11,9 @@ export default defineConfig({
   },
   integrations: [
     starlight({
+      components: {
+        Head: "./src/components/Head.astro",
+      },
       title: "ECS Express Mode",
       favicon: "/favicon.svg",
       description:
