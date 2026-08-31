@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import { starlightBasePath } from "starlight-base-path";
 import Icons from "unplugin-icons/vite";
 
 export default defineConfig({
@@ -10,18 +11,20 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      components: {
-        ThemeSelect: "./src/components/ThemeSelect.astro",
-        Head: "./src/components/Head.astro",
-      },
       title: "ECS Express Mode",
       favicon: "/favicon.svg",
       description:
         "Learn ECS Express Mode by example — a minimal Terraform deployment with managed ALB, auto scaling, and public HTTPS ingress.",
+      plugins: [starlightBasePath()],
+      routeMiddleware: "./src/routeData.ts",
       customCss: [
         "./src/styles/patina-tokens.css",
         "./src/styles/splash-overrides.css",
       ],
+      components: {
+        ThemeSelect: "./src/components/ThemeSelect.astro",
+        Head: "./src/components/Head.astro",
+      },
       social: [
         {
           icon: "github",
@@ -35,32 +38,6 @@ export default defineConfig({
       },
       lastUpdated: true,
       pagination: true,
-      head: [
-        {
-          tag: "meta",
-          attrs: {
-            property: "og:image",
-            content:
-              "https://jajera.github.io/ecs-express-mode-walkthrough/og-image.png",
-          },
-        },
-        {
-          tag: "meta",
-          attrs: {
-            property: "og:image:alt",
-            content:
-              "ECS Express Mode walkthrough — managed ALB, auto scaling, and HTTPS ingress with Terraform",
-          },
-        },
-        {
-          tag: "meta",
-          attrs: {
-            name: "twitter:image",
-            content:
-              "https://jajera.github.io/ecs-express-mode-walkthrough/og-image.png",
-          },
-        },
-      ],
       sidebar: [
         { label: "Introduction", link: "/" },
         { slug: "overview" },
