@@ -1,6 +1,5 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
-import starlightThemeVintage from "starlight-theme-vintage";
 import Icons from "unplugin-icons/vite";
 
 export default defineConfig({
@@ -12,14 +11,17 @@ export default defineConfig({
   integrations: [
     starlight({
       components: {
+        ThemeSelect: "./src/components/ThemeSelect.astro",
         Head: "./src/components/Head.astro",
       },
       title: "ECS Express Mode",
       favicon: "/favicon.svg",
       description:
         "Learn ECS Express Mode by example — a minimal Terraform deployment with managed ALB, auto scaling, and public HTTPS ingress.",
-      plugins: [starlightThemeVintage()],
-      customCss: ["./src/styles/splash-overrides.css"],
+      customCss: [
+        "./src/styles/patina-tokens.css",
+        "./src/styles/splash-overrides.css",
+      ],
       social: [
         {
           icon: "github",
