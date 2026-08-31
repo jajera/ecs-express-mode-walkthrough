@@ -122,6 +122,4 @@ This means:
   for all Express services in that VPC.
 </Aside>
 
-To change the Shared ALB type, you must remove all Express services in the VPC and redeploy the first one with the desired subnet type.
-
-![PLACEHOLDER: ECS console Express Mode sidebar (create-only wizard)](https://placeholder.test/ecs-console-express-mode-sidebar-create-only-wizard.png)
+To change the Shared ALB type, you must remove all Express services in the VPC and redeploy the first one with the desired subnet type. The ECS console Express Mode flow is create-only — there is no edit wizard for an existing Express service, so changing immutable fields means destroying and recreating the service (or updating via Terraform, which forces replacement).
