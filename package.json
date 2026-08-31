@@ -17,7 +17,6 @@
     "@iconify-json/mdi": "^1.2.0",
     "@iconify-json/simple-icons": "^1.2.0",
     "astro": "^6.4.6",
-    "starlight-theme-vintage": "^0.1.0",
     "unplugin-icons": "^23.0.1"
   },
   "devDependencies": {
