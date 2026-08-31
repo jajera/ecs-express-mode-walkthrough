@@ -56,10 +56,11 @@ npm run validate && npm run test && npm run build
 
 ## Deploy
 
-GitHub Pages on push to main via .github/workflows/deploy.yml.
+GitHub Pages on push to main via `.github/workflows/deploy.yml`, served at
+[ecs-express-mode-walkthrough.johna.kiwi](https://ecs-express-mode-walkthrough.johna.kiwi/).
 
-1. Repo Settings - Pages: Source = GitHub Actions
-2. astro.config.mjs: site and base must match the Pages URL
+1. Repo Settings → Pages: Source = GitHub Actions
+2. Custom domain / CNAME: `public/CNAME` + Route 53 via johna-kiwi-infra
 
 ## Content source
 

@@ -4,7 +4,7 @@
 
 This is an Astro Starlight documentation site for the **ECS Express Mode Walkthrough**. It documents the `terraform-aws-ecs-express-mode-demo` project — a minimal ECS Express Gateway Service deployment with Bedrock, auto scaling, managed ALB, and public HTTPS ingress.
 
-Deployed to GitHub Pages at `https://jajera.github.io/ecs-express-mode-walkthrough`.
+Deployed to GitHub Pages at `https://ecs-express-mode-walkthrough.johna.kiwi`.
 
 ## Project Structure
 
