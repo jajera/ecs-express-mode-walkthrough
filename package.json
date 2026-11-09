@@ -13,11 +13,11 @@
     "test": "vitest --run"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "^7.3.5",
-    "@astrojs/starlight": "^0.42.7",
+    "@astrojs/markdown-remark": "^7.3.6",
+    "@astrojs/starlight": "^0.42.9",
     "@iconify-json/mdi": "^1.2.0",
     "@iconify-json/simple-icons": "^1.2.101",
-    "astro": "^7.4.4",
+    "astro": "^7.4.7",
     "starlight-base-path": "^0.2.1",
     "unplugin-icons": "^24.0.0"
   },
